@@ -4,70 +4,57 @@ import { prisma } from "@/lib/db";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { especialidades } from "@/content/especialidades";
 import { MessageSquare, Calendar, Phone, Mail } from "lucide-react";
 
-async function getConsultas(usuarioId: string, rol: string) {
-  const where = rol === "ADMIN" ? {} : { OR: [{ profesionalId: usuarioId }, { profesionalId: null }] };
+async function getOrganizacionId(usuarioId: string): Promise<string | null> {
+  const membresia = await prisma.organizacionMiembro.findFirst({
+    where: { usuarioId, activo: true, deletedAt: null },
+  });
+  return membresia?.organizacionId ?? null;
+}
 
+async function getConsultas(organizacionId: string) {
   return prisma.consulta.findMany({
-    where,
+    where: { organizacionId, deletedAt: null },
     orderBy: [{ urgente: "desc" }, { createdAt: "desc" }],
     include: {
       turno: true,
-      profesional: true,
+      contacto: true,
     },
   });
-}
-
-function getNombreProblema(tipoProblema: string): string {
-  const problema = especialidades
-    .flatMap((e) => e.problemas)
-    .find((p) => p.id === tipoProblema);
-  return problema?.label || tipoProblema;
-}
-
-function getNombreEspecialidad(especialidadId: string): string {
-  const esp = especialidades.find((e) => e.id === especialidadId);
-  return esp?.nombre || especialidadId;
 }
 
 export default async function ConsultasPage() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const consultas = await getConsultas(session.user.id, session.user.rol);
+  const organizacionId = await getOrganizacionId(session.user.id);
+  if (!organizacionId) return null;
+
+  const consultas = await getConsultas(organizacionId);
 
   const estadoBadgeVariant = (estado: string) => {
     switch (estado) {
       case "NUEVA":
         return "default";
-      case "ASIGNADA":
+      case "EN_ANALISIS":
         return "secondary";
-      case "EN_PROCESO":
+      case "CONTACTADO":
         return "outline";
-      case "ATENDIDA":
+      case "CONVERTIDO":
         return "default";
-      case "CERRADA":
+      case "CERRADO":
         return "secondary";
       default:
         return "secondary";
     }
   };
 
-  const estadoLabel = (estado: string) => {
-    return estado.replace("_", " ");
-  };
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Consultas</h1>
-        <p className="text-muted-foreground">
-          {session.user.rol === "ADMIN"
-            ? "Todas las consultas recibidas"
-            : "Consultas asignadas y sin asignar"}
-        </p>
+        <p className="text-muted-foreground">Todas las consultas recibidas</p>
       </div>
 
       {consultas.length === 0 ? (
@@ -88,18 +75,17 @@ export default async function ConsultasPage() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <CardTitle className="text-lg">{consulta.nombre}</CardTitle>
+                      <CardTitle className="text-lg">{consulta.contacto.nombre}</CardTitle>
                       {consulta.urgente && (
                         <Badge variant="destructive">Urgente</Badge>
                       )}
                     </div>
                     <CardDescription>
-                      {getNombreEspecialidad(consulta.especialidad)} •{" "}
-                      {getNombreProblema(consulta.tipoProblema)}
+                      {consulta.especialidad} · {consulta.tipoProblema}
                     </CardDescription>
                   </div>
                   <Badge variant={estadoBadgeVariant(consulta.estado)}>
-                    {estadoLabel(consulta.estado)}
+                    {consulta.estado.replace("_", " ")}
                   </Badge>
                 </div>
               </CardHeader>
@@ -110,18 +96,18 @@ export default async function ConsultasPage() {
 
                 <div className="flex flex-wrap gap-4 text-sm">
                   <a
-                    href={`mailto:${consulta.email}`}
+                    href={`mailto:${consulta.contacto.email}`}
                     className="flex items-center gap-1 text-muted-foreground hover:text-primary"
                   >
                     <Mail className="h-4 w-4" />
-                    {consulta.email}
+                    {consulta.contacto.email}
                   </a>
                   <a
-                    href={`tel:${consulta.telefono}`}
+                    href={`tel:${consulta.contacto.telefono}`}
                     className="flex items-center gap-1 text-muted-foreground hover:text-primary"
                   >
                     <Phone className="h-4 w-4" />
-                    {consulta.telefono}
+                    {consulta.contacto.telefono}
                   </a>
                   {consulta.turno && (
                     <span className="flex items-center gap-1 text-muted-foreground">
@@ -133,18 +119,14 @@ export default async function ConsultasPage() {
 
                 <div className="flex items-center justify-between pt-2 border-t">
                   <div className="text-xs text-muted-foreground">
-                    Recibida: {new Date(consulta.createdAt).toLocaleDateString("es-AR", {
+                    Recibida:{" "}
+                    {new Date(consulta.createdAt).toLocaleDateString("es-AR", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                    {consulta.profesional && (
-                      <span className="ml-2">
-                        • Asignada a: {consulta.profesional.nombre}
-                      </span>
-                    )}
                   </div>
                   <Button asChild size="sm">
                     <Link href={`/panel/consultas/${consulta.id}`}>

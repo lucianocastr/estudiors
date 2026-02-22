@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-import type { Consulta } from "@prisma/client";
 import { especialidades } from "@/content/especialidades";
 
 // Configurar transporter de Nodemailer
@@ -13,7 +12,38 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Helper para obtener nombre del problema
+// ── Tipos de payload por template ────────────────────────────────────────────
+// Estos tipos coinciden con lo almacenado en EmailCola.payload
+
+export type PayloadNuevaConsultaAdmin = {
+  consultaId: string;
+  nombre: string;
+  email: string;
+  telefono: string;
+  localidad?: string;
+  especialidad: string;
+  tipoProblema: string;
+  descripcion: string;
+  urgente: boolean;
+  createdAt: string; // ISO string
+};
+
+export type PayloadConfirmacionCliente = {
+  consultaId: string;
+  nombre: string;
+  tipoProblema: string;
+};
+
+export type PayloadTurnoConfirmado = {
+  consultaId: string;
+  nombre: string;
+  email: string;
+  modalidad: string;
+  fechaConfirmada: string; // ISO string
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 function getNombreProblema(tipoProblema: string): string {
   const problema = especialidades
     .flatMap((e) => e.problemas)
@@ -21,72 +51,72 @@ function getNombreProblema(tipoProblema: string): string {
   return problema?.label || tipoProblema;
 }
 
-// Helper para obtener nombre de especialidad
 function getNombreEspecialidad(especialidadId: string): string {
   const esp = especialidades.find((e) => e.id === especialidadId);
   return esp?.nombre || especialidadId;
 }
 
-/**
- * Enviar email de notificación al estudio cuando llega una nueva consulta
- */
-export async function enviarEmailNuevaConsulta(consulta: Consulta): Promise<void> {
+// ── Template: nueva-consulta-admin ────────────────────────────────────────────
+
+export async function enviarEmailNuevaConsulta(
+  payload: PayloadNuevaConsultaAdmin
+): Promise<void> {
   const emailEstudio = process.env.ESTUDIO_EMAIL;
   if (!emailEstudio) {
     console.warn("ESTUDIO_EMAIL no configurado, omitiendo notificación");
     return;
   }
 
-  const asunto = consulta.urgente
-    ? `[URGENTE] Nueva consulta de ${consulta.nombre}`
-    : `Nueva consulta de ${consulta.nombre}`;
+  const asunto = payload.urgente
+    ? `[URGENTE] Nueva consulta de ${payload.nombre}`
+    : `Nueva consulta de ${payload.nombre}`;
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Nueva Consulta Recibida</h2>
 
-      ${consulta.urgente ? '<p style="color: #dc2626; font-weight: bold;">⚠️ MARCADA COMO URGENTE</p>' : ""}
+      ${payload.urgente ? '<p style="color: #dc2626; font-weight: bold;">⚠️ MARCADA COMO URGENTE</p>' : ""}
 
       <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
         <tr>
           <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Nombre:</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${consulta.nombre}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">${payload.nombre}</td>
         </tr>
         <tr>
           <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
           <td style="padding: 10px; border-bottom: 1px solid #eee;">
-            <a href="mailto:${consulta.email}">${consulta.email}</a>
+            <a href="mailto:${payload.email}">${payload.email}</a>
           </td>
         </tr>
         <tr>
           <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Teléfono:</td>
           <td style="padding: 10px; border-bottom: 1px solid #eee;">
-            <a href="tel:${consulta.telefono}">${consulta.telefono}</a>
+            <a href="tel:${payload.telefono}">${payload.telefono}</a>
           </td>
         </tr>
-        ${consulta.localidad ? `
+        ${payload.localidad ? `
         <tr>
           <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Localidad:</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${consulta.localidad}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">${payload.localidad}</td>
         </tr>
         ` : ""}
         <tr>
           <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Especialidad:</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${getNombreEspecialidad(consulta.especialidad)}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">${getNombreEspecialidad(payload.especialidad)}</td>
         </tr>
         <tr>
           <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Tipo de problema:</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${getNombreProblema(consulta.tipoProblema)}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">${getNombreProblema(payload.tipoProblema)}</td>
         </tr>
       </table>
 
       <h3 style="color: #333;">Descripción:</h3>
-      <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${consulta.descripcion}</div>
+      <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${payload.descripcion}</div>
 
       <p style="color: #666; font-size: 12px; margin-top: 30px;">
-        Consulta recibida el ${new Date(consulta.createdAt).toLocaleString("es-AR")}
+        Consulta recibida el ${new Date(payload.createdAt).toLocaleString("es-AR")}
         <br>
-        ID: ${consulta.id}
+        ID: ${payload.consultaId}
       </p>
     </div>
   `;
@@ -99,21 +129,24 @@ export async function enviarEmailNuevaConsulta(consulta: Consulta): Promise<void
   });
 }
 
-/**
- * Enviar email de confirmación al usuario que hizo la consulta
- */
-export async function enviarEmailConfirmacion(consulta: Consulta): Promise<void> {
-  const nombreEstudio = process.env.ESTUDIO_NOMBRE || "Estudio Jurídico";
+// ── Template: confirmacion-cliente ────────────────────────────────────────────
+
+export async function enviarEmailConfirmacion(
+  payload: PayloadConfirmacionCliente,
+  destinatario: string
+): Promise<void> {
+  const nombreEstudio = process.env.ESTUDIO_NOMBRE || "Estudio Jurídico RS";
+  const primerNombre = payload.nombre.split(" ")[0];
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Recibimos tu consulta</h2>
 
-      <p>Hola ${consulta.nombre.split(" ")[0]},</p>
+      <p>Hola ${primerNombre},</p>
 
       <p>
         Gracias por contactarte con ${nombreEstudio}. Recibimos tu consulta sobre
-        <strong>${getNombreProblema(consulta.tipoProblema).toLowerCase()}</strong> y un profesional
+        <strong>${getNombreProblema(payload.tipoProblema).toLowerCase()}</strong> y un profesional
         de nuestro equipo la revisará a la brevedad.
       </p>
 
@@ -131,7 +164,7 @@ export async function enviarEmailConfirmacion(consulta: Consulta): Promise<void>
       </div>
 
       <p>
-        Si tenés alguna urgencia o necesitás comunicarte antes, podés escribirnos a
+        Si tenés alguna urgencia, podés escribirnos a
         <a href="mailto:${process.env.ESTUDIO_EMAIL}">${process.env.ESTUDIO_EMAIL}</a> o
         llamarnos al <a href="tel:${process.env.ESTUDIO_TELEFONO}">${process.env.ESTUDIO_TELEFONO}</a>.
       </p>
@@ -151,32 +184,29 @@ export async function enviarEmailConfirmacion(consulta: Consulta): Promise<void>
 
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
-    to: consulta.email,
-    subject: `Recibimos tu consulta - ${nombreEstudio}`,
+    to: destinatario,
+    subject: `Recibimos tu consulta — ${nombreEstudio}`,
     html,
   });
 }
 
-/**
- * Enviar email de confirmación de turno al usuario
- */
-export async function enviarEmailTurnoConfirmado(
-  consulta: Consulta,
-  turno: {
-    modalidad: string;
-    fechaConfirmada: Date;
-  }
-): Promise<void> {
-  const nombreEstudio = process.env.ESTUDIO_NOMBRE || "Estudio Jurídico";
+// ── Template: turno-confirmado ────────────────────────────────────────────────
 
-  const fechaFormateada = turno.fechaConfirmada.toLocaleDateString("es-AR", {
+export async function enviarEmailTurnoConfirmado(
+  payload: PayloadTurnoConfirmado
+): Promise<void> {
+  const nombreEstudio = process.env.ESTUDIO_NOMBRE || "Estudio Jurídico RS";
+  const primerNombre = payload.nombre.split(" ")[0];
+  const fecha = new Date(payload.fechaConfirmada);
+
+  const fechaFormateada = fecha.toLocaleDateString("es-AR", {
     weekday: "long",
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
-  const horaFormateada = turno.fechaConfirmada.toLocaleTimeString("es-AR", {
+  const horaFormateada = fecha.toLocaleTimeString("es-AR", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -185,29 +215,23 @@ export async function enviarEmailTurnoConfirmado(
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Turno Confirmado</h2>
 
-      <p>Hola ${consulta.nombre.split(" ")[0]},</p>
+      <p>Hola ${primerNombre},</p>
 
       <p>Te confirmamos tu turno para una entrevista:</p>
 
       <div style="background: #f0f9ff; padding: 20px; border-radius: 5px; border-left: 4px solid #0ea5e9; margin: 20px 0;">
         <p style="margin: 0;"><strong>Fecha:</strong> ${fechaFormateada}</p>
         <p style="margin: 10px 0 0 0;"><strong>Hora:</strong> ${horaFormateada}</p>
-        <p style="margin: 10px 0 0 0;"><strong>Modalidad:</strong> ${turno.modalidad === "PRESENCIAL" ? "Presencial" : "Virtual (videollamada)"}</p>
+        <p style="margin: 10px 0 0 0;"><strong>Modalidad:</strong> ${payload.modalidad === "PRESENCIAL" ? "Presencial" : "Virtual (videollamada)"}</p>
       </div>
 
-      ${turno.modalidad === "PRESENCIAL" ? `
-        <p>
-          <strong>Dirección:</strong> ${process.env.ESTUDIO_DIRECCION || "Alta Gracia, Córdoba"}
-        </p>
+      ${payload.modalidad === "PRESENCIAL" ? `
+        <p><strong>Dirección:</strong> ${process.env.ESTUDIO_DIRECCION || "Córdoba, Argentina"}</p>
       ` : `
-        <p>
-          Te enviaremos el enlace de la videollamada antes de la cita.
-        </p>
+        <p>Te enviaremos el enlace de la videollamada antes de la cita.</p>
       `}
 
-      <p>
-        Si necesitás reprogramar o cancelar, por favor contactanos con anticipación.
-      </p>
+      <p>Si necesitás reprogramar o cancelar, por favor contactanos con anticipación.</p>
 
       <p>Saludos cordiales,</p>
       <p><strong>${nombreEstudio}</strong></p>
@@ -216,15 +240,14 @@ export async function enviarEmailTurnoConfirmado(
 
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
-    to: consulta.email,
-    subject: `Turno confirmado - ${nombreEstudio}`,
+    to: payload.email,
+    subject: `Turno confirmado — ${nombreEstudio}`,
     html,
   });
 }
 
-/**
- * Verificar conexión SMTP
- */
+// ── Verificar conexión SMTP ───────────────────────────────────────────────────
+
 export async function verificarConexionSMTP(): Promise<boolean> {
   try {
     await transporter.verify();

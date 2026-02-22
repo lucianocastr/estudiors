@@ -1,20 +1,26 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Video, Phone, Mail } from "lucide-react";
 
-async function getTurnos(usuarioId: string, rol: string) {
-  const where = rol === "ADMIN" ? {} : { OR: [{ profesionalId: usuarioId }, { profesionalId: null }] };
+async function getOrganizacionId(usuarioId: string): Promise<string | null> {
+  const membresia = await prisma.organizacionMiembro.findFirst({
+    where: { usuarioId, activo: true, deletedAt: null },
+  });
+  return membresia?.organizacionId ?? null;
+}
 
+async function getTurnos(organizacionId: string) {
   return prisma.turno.findMany({
-    where,
+    where: { organizacionId, deletedAt: null },
     orderBy: [{ estado: "asc" }, { fechaPreferida: "asc" }],
     include: {
-      consulta: true,
-      profesional: true,
+      consulta: {
+        include: { contacto: true },
+      },
     },
   });
 }
@@ -23,7 +29,10 @@ export default async function TurnosPage() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const turnos = await getTurnos(session.user.id, session.user.rol);
+  const organizacionId = await getOrganizacionId(session.user.id);
+  if (!organizacionId) return null;
+
+  const turnos = await getTurnos(organizacionId);
 
   const estadoBadgeVariant = (estado: string) => {
     switch (estado) {
@@ -42,19 +51,11 @@ export default async function TurnosPage() {
     }
   };
 
-  const estadoLabel = (estado: string) => {
-    return estado;
-  };
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Turnos</h1>
-        <p className="text-muted-foreground">
-          {session.user.rol === "ADMIN"
-            ? "Todos los turnos solicitados"
-            : "Turnos asignados y pendientes"}
-        </p>
+        <p className="text-muted-foreground">Todos los turnos solicitados</p>
       </div>
 
       {turnos.length === 0 ? (
@@ -72,7 +73,7 @@ export default async function TurnosPage() {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <CardTitle className="text-lg">
-                      {turno.consulta.nombre}
+                      {turno.consulta.contacto.nombre}
                     </CardTitle>
                     <CardDescription className="flex items-center gap-2">
                       {turno.modalidad === "PRESENCIAL" ? (
@@ -89,7 +90,7 @@ export default async function TurnosPage() {
                     </CardDescription>
                   </div>
                   <Badge variant={estadoBadgeVariant(turno.estado)}>
-                    {estadoLabel(turno.estado)}
+                    {turno.estado}
                   </Badge>
                 </div>
               </CardHeader>
@@ -109,8 +110,8 @@ export default async function TurnosPage() {
                     <Clock className="h-4 w-4" />
                     <span>
                       {turno.horarioPreferido === "manana"
-                        ? "Mañana (9-13hs)"
-                        : "Tarde (17-20hs)"}
+                        ? "Mañana (9–13hs)"
+                        : "Tarde (17–20hs)"}
                     </span>
                   </div>
                 </div>
@@ -132,18 +133,18 @@ export default async function TurnosPage() {
 
                 <div className="flex flex-wrap gap-4 text-sm">
                   <a
-                    href={`mailto:${turno.consulta.email}`}
+                    href={`mailto:${turno.consulta.contacto.email}`}
                     className="flex items-center gap-1 text-muted-foreground hover:text-primary"
                   >
                     <Mail className="h-4 w-4" />
-                    {turno.consulta.email}
+                    {turno.consulta.contacto.email}
                   </a>
                   <a
-                    href={`tel:${turno.consulta.telefono}`}
+                    href={`tel:${turno.consulta.contacto.telefono}`}
                     className="flex items-center gap-1 text-muted-foreground hover:text-primary"
                   >
                     <Phone className="h-4 w-4" />
-                    {turno.consulta.telefono}
+                    {turno.consulta.contacto.telefono}
                   </a>
                 </div>
 
@@ -151,11 +152,6 @@ export default async function TurnosPage() {
                   <div className="text-xs text-muted-foreground">
                     Solicitado:{" "}
                     {new Date(turno.createdAt).toLocaleDateString("es-AR")}
-                    {turno.profesional && (
-                      <span className="ml-2">
-                        • Asignado a: {turno.profesional.nombre}
-                      </span>
-                    )}
                   </div>
                   <Button asChild size="sm">
                     <Link href={`/panel/consultas/${turno.consultaId}`}>

@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { prisma } from "./db";
+import type { MemberRole } from "@prisma/client";
 
 // Tipos extendidos para la sesión
 declare module "next-auth" {
@@ -10,7 +11,7 @@ declare module "next-auth" {
       email: string;
       name: string;
       image?: string;
-      rol: "ADMIN" | "PROFESIONAL";
+      rol: MemberRole;
     };
   }
 }
@@ -32,7 +33,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       });
 
       // Solo permitir login si el usuario está registrado y activo
-      if (!existingUser || !existingUser.activo) {
+      if (!existingUser || !existingUser.activo || existingUser.deletedAt) {
         return false;
       }
 
@@ -54,7 +55,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;
-        session.user.rol = token.rol as "ADMIN" | "PROFESIONAL";
+        session.user.rol = token.rol as MemberRole;
         session.user.name = token.nombre as string;
       }
       return session;
@@ -81,7 +82,7 @@ export async function isAdmin(email: string): Promise<boolean> {
   const usuario = await prisma.usuario.findUnique({
     where: { email },
   });
-  return usuario?.rol === "ADMIN";
+  return usuario?.rol === "OWNER" || usuario?.rol === "ADMIN";
 }
 
 // Helper para obtener el usuario actual del panel
@@ -92,4 +93,18 @@ export async function getCurrentUser() {
   return prisma.usuario.findUnique({
     where: { email: session.user.email },
   });
+}
+
+// Helper: verifica si un usuario puede administrar una organización específica
+export async function puedeAdministrar(
+  usuarioId: string,
+  organizacionId: string
+): Promise<boolean> {
+  const miembro = await prisma.organizacionMiembro.findUnique({
+    where: {
+      organizacionId_usuarioId: { organizacionId, usuarioId },
+    },
+  });
+  if (!miembro?.activo || miembro.deletedAt) return false;
+  return miembro.rol === "OWNER" || miembro.rol === "ADMIN";
 }

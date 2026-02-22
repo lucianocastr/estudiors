@@ -54,7 +54,11 @@ export default async function PanelLayout({
               <div className="hidden sm:block">
                 <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {session.user.rol === "ADMIN" ? "Administrador" : "Profesional"}
+                  {session.user.rol === "OWNER" || session.user.rol === "ADMIN"
+                    ? "Administrador"
+                    : session.user.rol === "ASISTENTE"
+                    ? "Asistente"
+                    : "Profesional"}
                 </p>
               </div>
             </div>

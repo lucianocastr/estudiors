@@ -1,5 +1,6 @@
-// Prisma Schema - Estudio Jurídico
-// Sistema Web Institucional
+// Prisma Schema — Estudio Jurídico RS
+// Legal CRM v2.0 — Arquitectura revisada
+// Contact(1) → Inquiry(N), Organization, InquiryAssignment, InquiryEvent, soft delete, índices
 
 generator client {
   provider = "prisma-client-js"
@@ -11,117 +12,37 @@ datasource db {
 }
 
 // ============================================
-// USUARIOS (Profesionales + Admin)
+// ENUMS
 // ============================================
 
-model Usuario {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  nombre         String
-  rol            Rol      @default(PROFESIONAL)
-  titulo         String?  // Ej: "Abogado", "Dra."
-  matricula      String?
-  especialidades String[] // IDs de especialidades
-  foto           String?
-  bio            String?
-  telefono       String?
-  activo         Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Relaciones
-  consultasAsignadas Consulta[]
-  turnosAsignados    Turno[]
-  notasCreadas       Nota[]
-  bloqueosHorario    BloqueoHorario[]
-}
-
-enum Rol {
+enum MemberRole {
+  OWNER
   ADMIN
   PROFESIONAL
+  ASISTENTE
 }
 
-// ============================================
-// CONSULTAS (Formulario público)
-// ============================================
-
-model Consulta {
-  id             String         @id @default(cuid())
-
-  // Datos del problema
-  tipoProblema   String         // Clave del tipo de problema
-  especialidad   String         // Especialidad relacionada
-  descripcion    String         @db.Text
-  urgente        Boolean        @default(false)
-
-  // Datos del contacto
-  nombre         String
-  email          String
-  telefono       String
-  localidad      String?
-
-  // Gestión interna
-  estado         EstadoConsulta @default(NUEVA)
-  profesionalId  String?
-  profesional    Usuario?       @relation(fields: [profesionalId], references: [id])
-
-  // Legal
-  aceptaTerminos     Boolean
-  disclaimerLeido    Boolean
-
-  // Timestamps
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-
-  // Relaciones
-  notas          Nota[]
-  turno          Turno?
-
-  @@index([estado])
-  @@index([profesionalId])
-  @@index([tipoProblema])
-}
-
-enum EstadoConsulta {
+enum InquiryEstado {
   NUEVA
-  ASIGNADA
-  EN_PROCESO
-  ATENDIDA
-  CERRADA
+  EN_ANALISIS
+  CONTACTADO
+  CONVERTIDO
+  CERRADO
 }
 
-// ============================================
-// TURNOS
-// ============================================
+enum InquiryPrioridad {
+  BAJA
+  NORMAL
+  ALTA
+  URGENTE
+}
 
-model Turno {
-  id               String      @id @default(cuid())
-
-  // Relación con consulta
-  consultaId       String      @unique
-  consulta         Consulta    @relation(fields: [consultaId], references: [id], onDelete: Cascade)
-
-  // Asignación
-  profesionalId    String?
-  profesional      Usuario?    @relation(fields: [profesionalId], references: [id])
-
-  // Datos del turno
-  modalidad        Modalidad
-  fechaPreferida   DateTime
-  horarioPreferido String      // "manana" | "tarde"
-  fechaConfirmada  DateTime?
-
-  // Estado
-  estado           EstadoTurno @default(PENDIENTE)
-  motivoRechazo    String?
-
-  // Timestamps
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-
-  @@index([estado])
-  @@index([profesionalId])
-  @@index([fechaPreferida])
+enum FuenteCaptacion {
+  WEB
+  INSTAGRAM
+  WHATSAPP
+  REFERIDO
+  OTRO
 }
 
 enum Modalidad {
@@ -129,7 +50,7 @@ enum Modalidad {
   VIRTUAL
 }
 
-enum EstadoTurno {
+enum AppointmentEstado {
   PENDIENTE
   CONFIRMADO
   RECHAZADO
@@ -137,48 +58,395 @@ enum EstadoTurno {
   CANCELADO
 }
 
-// ============================================
-// NOTAS INTERNAS
-// ============================================
+enum NotaTipo {
+  GENERAL
+  LLAMADA
+  REUNION
+  SEGUIMIENTO
+  SISTEMA
+}
 
-model Nota {
-  id         String   @id @default(cuid())
+enum EventTipo {
+  CREATED
+  STATE_CHANGED
+  ASSIGNED
+  REASSIGNED
+  NOTE_ADDED
+  NOTE_DELETED
+  APPOINTMENT_CREATED
+  APPOINTMENT_CONFIRMED
+  APPOINTMENT_REJECTED
+  APPOINTMENT_COMPLETED
+  CONTACT_ATTEMPT
+  CLIENT_CONVERTED
+  CLOSED
+}
 
-  consultaId String
-  consulta   Consulta @relation(fields: [consultaId], references: [id], onDelete: Cascade)
+enum EmailEstado {
+  PENDIENTE
+  PROCESANDO
+  ENVIADO
+  FALLIDO
+  CANCELADO
+}
 
-  autorId    String
-  autor      Usuario  @relation(fields: [autorId], references: [id])
-
-  contenido  String   @db.Text
-
-  createdAt  DateTime @default(now())
-
-  @@index([consultaId])
+enum OrganizacionPlan {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
 }
 
 // ============================================
-// BLOQUEO DE HORARIOS
+// ORGANIZACIÓN — Tenant root
+// ============================================
+
+model Organizacion {
+  id            String           @id @default(cuid())
+  nombre        String
+  slug          String           @unique
+  plan          OrganizacionPlan @default(FREE)
+  activa        Boolean          @default(true)
+  configuracion Json?
+
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
+
+  miembros      OrganizacionMiembro[]
+  contactos     Contacto[]
+  consultas     Consulta[]
+  asignaciones  ConsultaAsignacion[]
+  eventos       ConsultaEvento[]
+  turnos        Turno[]
+  notas         Nota[]
+  emailCola     EmailCola[]
+  configuraciones Configuracion[]
+
+  @@index([slug])
+  @@index([deletedAt])
+}
+
+// ============================================
+// USUARIO — Sistema (NextAuth)
+// ============================================
+
+model Usuario {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  nombre    String
+  imagen    String?
+  rol       MemberRole @default(PROFESIONAL) // Rol global del sistema
+  titulo    String?    // "Dra.", "Dr.", "Abogado/a"
+  matricula String?
+  bio       String?
+  telefono  String?
+  activo    Boolean    @default(true)
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+
+  membresias            OrganizacionMiembro[]
+  notasCreadas          Nota[]
+  asignacionesHechas    ConsultaAsignacion[]  @relation("AsignadoPor")
+  asignacionesRecibidas ConsultaAsignacion[]  @relation("AsignadoA")
+  eventosCreados        ConsultaEvento[]
+  bloqueosHorario       BloqueoHorario[]
+
+  @@index([email])
+  @@index([deletedAt])
+}
+
+// ============================================
+// MEMBRESÍA — Rol por organización
+// ============================================
+
+model OrganizacionMiembro {
+  id             String       @id @default(cuid())
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+  usuarioId      String
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id])
+  rol            MemberRole   @default(PROFESIONAL)
+  permisos       Json?        // Overrides futuros por campo
+  activo         Boolean      @default(true)
+
+  createdAt      DateTime     @default(now())
+  deletedAt      DateTime?
+
+  @@unique([organizacionId, usuarioId])
+  @@index([organizacionId])
+  @@index([usuarioId])
+  @@index([organizacionId, rol])
+}
+
+// ============================================
+// CONTACTO — Persona (1 → N consultas)
+// ============================================
+
+model Contacto {
+  id             String          @id @default(cuid())
+  organizacionId String
+  organizacion   Organizacion    @relation(fields: [organizacionId], references: [id])
+
+  // Datos personales
+  nombre         String
+  email          String
+  telefono       String
+  localidad      String?
+  documentoTipo  String?         // DNI | CUIL | Pasaporte
+  documentoNro   String?
+
+  // CRM
+  fuente         FuenteCaptacion @default(WEB)
+  tags           String[]
+
+  // Escalón hacia entidad Client (Fase 3)
+  esCliente      Boolean         @default(false)
+  clienteDesdeAt DateTime?       // Se popula cuando primera consulta convierte
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+
+  consultas      Consulta[]
+
+  @@index([organizacionId])
+  @@index([organizacionId, email])  // Deduplicación
+  @@index([esCliente])
+  @@index([deletedAt])
+}
+
+// ============================================
+// CONSULTA / INQUIRY — Caso (pertenece a Contacto)
+// ============================================
+
+model Consulta {
+  id             String           @id @default(cuid())
+  organizacionId String
+  organizacion   Organizacion     @relation(fields: [organizacionId], references: [id])
+  contactoId     String
+  contacto       Contacto         @relation(fields: [contactoId], references: [id])
+
+  // Datos del caso
+  especialidad    String
+  tipoProblema    String
+  descripcion     String           @db.Text
+  urgente         Boolean          @default(false)
+  prioridad       InquiryPrioridad @default(NORMAL)
+
+  // CRM
+  estado          InquiryEstado    @default(NUEVA)
+
+  // Legal
+  aceptaTerminos  Boolean          @default(false)
+  disclaimerLeido Boolean          @default(false)
+
+  // Timestamps de conversión — para métricas de embudo
+  contactadoAt    DateTime?        // STATE → CONTACTADO
+  convertidoAt    DateTime?        // STATE → CONVERTIDO
+  cerradoAt       DateTime?        // STATE → CERRADO
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+
+  asignaciones    ConsultaAsignacion[]
+  eventos         ConsultaEvento[]
+  notas           Nota[]
+  turno           Turno?
+
+  @@index([organizacionId])
+  @@index([contactoId])
+  @@index([organizacionId, estado])
+  @@index([organizacionId, urgente])
+  @@index([organizacionId, prioridad])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+// ============================================
+// ASIGNACIÓN — Historial completo por consulta
+// ============================================
+
+model ConsultaAsignacion {
+  id             String       @id @default(cuid())
+  consultaId     String
+  consulta       Consulta     @relation(fields: [consultaId], references: [id])
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  asignadoAId    String
+  asignadoA      Usuario      @relation("AsignadoA", fields: [asignadoAId], references: [id])
+  asignadoPorId  String
+  asignadoPor    Usuario      @relation("AsignadoPor", fields: [asignadoPorId], references: [id])
+
+  activo         Boolean      @default(true)   // Solo 1 activo por consulta
+  nota           String?
+
+  createdAt      DateTime     @default(now())
+  reasignadoAt   DateTime?    // Cuándo fue reemplazado
+
+  @@index([consultaId])
+  @@index([asignadoAId])
+  @@index([consultaId, activo])  // Asignación actual eficiente
+  @@index([organizacionId])
+}
+
+// ============================================
+// EVENTO — Audit log append-only (nunca se modifica)
+// ============================================
+
+model ConsultaEvento {
+  id             String       @id @default(cuid())
+  consultaId     String
+  consulta       Consulta     @relation(fields: [consultaId], references: [id])
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  autorId        String?      // null = acción del sistema
+  autor          Usuario?     @relation(fields: [autorId], references: [id])
+
+  tipo           EventTipo
+  estadoAnterior String?
+  estadoNuevo    String?
+  metadata       Json?        // Datos adicionales flexibles
+
+  createdAt      DateTime     @default(now()) // Sin updatedAt — inmutable
+
+  @@index([consultaId])
+  @@index([consultaId, tipo])
+  @@index([organizacionId, createdAt])
+}
+
+// ============================================
+// TURNO / APPOINTMENT
+// ============================================
+
+model Turno {
+  id             String            @id @default(cuid())
+  consultaId     String            @unique
+  consulta       Consulta          @relation(fields: [consultaId], references: [id])
+  organizacionId String
+  organizacion   Organizacion      @relation(fields: [organizacionId], references: [id])
+
+  // Preferencia del cliente
+  modalidad        Modalidad
+  fechaPreferida   DateTime
+  horarioPreferido String            // "manana" | "tarde"
+
+  // Gestión
+  estado           AppointmentEstado @default(PENDIENTE)
+  fechaConfirmada  DateTime?
+  linkVideoCall    String?
+  motivoRechazo    String?
+  asistio          Boolean?          // null = sin evaluar aún
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  deletedAt        DateTime?
+
+  @@index([organizacionId])
+  @@index([organizacionId, estado])
+  @@index([fechaConfirmada])
+  @@index([deletedAt])
+}
+
+// ============================================
+// NOTA — Interna por consulta
+// ============================================
+
+model Nota {
+  id             String       @id @default(cuid())
+  consultaId     String
+  consulta       Consulta     @relation(fields: [consultaId], references: [id])
+  autorId        String
+  autor          Usuario      @relation(fields: [autorId], references: [id])
+  organizacionId String
+  organizacion   Organizacion @relation(fields: [organizacionId], references: [id])
+
+  contenido      String       @db.Text
+  tipo           NotaTipo     @default(GENERAL)
+  esPrivada      Boolean      @default(true)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  @@index([consultaId])
+  @@index([autorId])
+  @@index([consultaId, deletedAt])  // Notas activas de una consulta
+}
+
+// ============================================
+// EMAIL COLA — Servicio desacoplado
+// ============================================
+
+model EmailCola {
+  id             String       @id @default(cuid())
+  organizacionId String?
+  organizacion   Organizacion? @relation(fields: [organizacionId], references: [id])
+
+  destinatario   String
+  asunto         String
+  template       String       // Identificador de plantilla
+  payload        Json         // Datos para la plantilla
+  prioridad      Int          @default(5) // 1=alta, 10=baja
+
+  estado         EmailEstado  @default(PENDIENTE)
+  intentos       Int          @default(0)
+  maxIntentos    Int          @default(3)
+  proximoIntento DateTime?    // Backoff exponencial
+  errorUltimo    String?
+  procesadoAt    DateTime?
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([estado, proximoIntento]) // Cola del worker
+  @@index([organizacionId])
+}
+
+// ============================================
+// BLOQUEO DE HORARIOS — Agenda
 // ============================================
 
 model BloqueoHorario {
-  id            String   @id @default(cuid())
+  id             String   @id @default(cuid())
+  usuarioId      String
+  usuario        Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  organizacionId String?
 
-  profesionalId String
-  profesional   Usuario  @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
+  fechaInicio    DateTime
+  fechaFin       DateTime
+  motivo         String?
 
-  fechaInicio   DateTime
-  fechaFin      DateTime
-  motivo        String?
+  createdAt      DateTime @default(now())
 
-  createdAt     DateTime @default(now())
-
-  @@index([profesionalId])
+  @@index([usuarioId])
   @@index([fechaInicio, fechaFin])
 }
 
 // ============================================
-// ESPECIALIDADES (Contenido editable)
+// CONFIGURACIÓN — Key/value por organización
+// ============================================
+
+model Configuracion {
+  id             String       @id @default(cuid())
+  organizacionId String?
+  organizacion   Organizacion? @relation(fields: [organizacionId], references: [id])
+  clave          String
+  valor          String       @db.Text
+  tipo           String       @default("text") // "text" | "json" | "html"
+
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizacionId, clave])
+}
+
+// ============================================
+// ESPECIALIDADES — Contenido (CMS futuro)
 // ============================================
 
 model Especialidad {
@@ -194,17 +462,4 @@ model Especialidad {
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-}
-
-// ============================================
-// CONFIGURACION DEL SITIO
-// ============================================
-
-model Configuracion {
-  id        String   @id @default(cuid())
-  clave     String   @unique
-  valor     String   @db.Text
-  tipo      String   @default("text") // "text" | "json" | "html"
-
-  updatedAt DateTime @updatedAt
 }

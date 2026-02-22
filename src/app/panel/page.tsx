@@ -12,40 +12,45 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-async function getEstadisticas(usuarioId: string, rol: string) {
-  const where = rol === "ADMIN" ? {} : { profesionalId: usuarioId };
+async function getOrganizacionId(usuarioId: string): Promise<string | null> {
+  const membresia = await prisma.organizacionMiembro.findFirst({
+    where: { usuarioId, activo: true, deletedAt: null },
+  });
+  return membresia?.organizacionId ?? null;
+}
+
+async function getEstadisticas(organizacionId: string) {
+  const base = { organizacionId, deletedAt: null };
 
   const [
     totalConsultas,
     consultasNuevas,
-    consultasEnProceso,
+    consultasEnAnalisis,
     turnosPendientes,
     consultasUrgentes,
   ] = await Promise.all([
-    prisma.consulta.count({ where }),
-    prisma.consulta.count({ where: { ...where, estado: "NUEVA" } }),
-    prisma.consulta.count({ where: { ...where, estado: "EN_PROCESO" } }),
-    prisma.turno.count({ where: { ...where, estado: "PENDIENTE" } }),
-    prisma.consulta.count({ where: { ...where, urgente: true, estado: { not: "CERRADA" } } }),
+    prisma.consulta.count({ where: base }),
+    prisma.consulta.count({ where: { ...base, estado: "NUEVA" } }),
+    prisma.consulta.count({ where: { ...base, estado: "EN_ANALISIS" } }),
+    prisma.turno.count({ where: { organizacionId, deletedAt: null, estado: "PENDIENTE" } }),
+    prisma.consulta.count({ where: { ...base, urgente: true, estado: { not: "CERRADO" } } }),
   ]);
 
   return {
     totalConsultas,
     consultasNuevas,
-    consultasEnProceso,
+    consultasEnAnalisis,
     turnosPendientes,
     consultasUrgentes,
   };
 }
 
-async function getUltimasConsultas(usuarioId: string, rol: string) {
-  const where = rol === "ADMIN" ? {} : { profesionalId: usuarioId };
-
+async function getUltimasConsultas(organizacionId: string) {
   return prisma.consulta.findMany({
-    where,
+    where: { organizacionId, deletedAt: null },
     orderBy: { createdAt: "desc" },
     take: 5,
-    include: { turno: true },
+    include: { turno: true, contacto: true },
   });
 }
 
@@ -53,18 +58,21 @@ export default async function PanelDashboard() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const stats = await getEstadisticas(session.user.id, session.user.rol);
-  const ultimasConsultas = await getUltimasConsultas(session.user.id, session.user.rol);
+  const organizacionId = await getOrganizacionId(session.user.id);
+  if (!organizacionId) return null;
+
+  const stats = await getEstadisticas(organizacionId);
+  const ultimasConsultas = await getUltimasConsultas(organizacionId);
 
   const estadoBadgeVariant = (estado: string) => {
     switch (estado) {
       case "NUEVA":
         return "default";
-      case "ASIGNADA":
+      case "EN_ANALISIS":
         return "secondary";
-      case "EN_PROCESO":
+      case "CONTACTADO":
         return "outline";
-      case "ATENDIDA":
+      case "CONVERTIDO":
         return "default";
       default:
         return "secondary";
@@ -101,11 +109,11 @@ export default async function PanelDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">En Proceso</CardTitle>
+            <CardTitle className="text-sm font-medium">En Análisis</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.consultasEnProceso}</div>
+            <div className="text-2xl font-bold">{stats.consultasEnAnalisis}</div>
             <p className="text-xs text-muted-foreground">
               consultas activas
             </p>
@@ -175,7 +183,7 @@ export default async function PanelDashboard() {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium truncate">{consulta.nombre}</p>
+                      <p className="font-medium truncate">{consulta.contacto.nombre}</p>
                       {consulta.urgente && (
                         <Badge variant="destructive" className="text-xs">
                           Urgente
