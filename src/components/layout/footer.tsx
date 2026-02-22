@@ -103,11 +103,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/equipo" className="hover:text-background transition-colors">
-                  Nuestro Equipo
-                </Link>
-              </li>
-              <li>
                 <Link href="/consulta" className="hover:text-background transition-colors">
                   Hacer una Consulta
                 </Link>
