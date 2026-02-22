@@ -441,7 +441,7 @@ export function ConsultaForm() {
                           <FormLabel>Modalidad</FormLabel>
                           <FormControl>
                             <RadioGroup
-                              value={field.value}
+                              value={field.value ?? ""}
                               onValueChange={field.onChange}
                               className="flex gap-4"
                             >
@@ -489,7 +489,7 @@ export function ConsultaForm() {
                           <FormLabel>Horario preferido</FormLabel>
                           <FormControl>
                             <RadioGroup
-                              value={field.value}
+                              value={field.value ?? ""}
                               onValueChange={field.onChange}
                               className="flex gap-4"
                             >

@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:studio": "prisma studio",
+    "email:process": "curl -s -X POST http://localhost:3000/api/email-worker | npx json",
     "postinstall": "prisma generate"
   },
   "dependencies": {
