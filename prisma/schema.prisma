@@ -1,0 +1,210 @@
+// Prisma Schema - Estudio Jurídico
+// Sistema Web Institucional
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USUARIOS (Profesionales + Admin)
+// ============================================
+
+model Usuario {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  nombre         String
+  rol            Rol      @default(PROFESIONAL)
+  titulo         String?  // Ej: "Abogado", "Dra."
+  matricula      String?
+  especialidades String[] // IDs de especialidades
+  foto           String?
+  bio            String?
+  telefono       String?
+  activo         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relaciones
+  consultasAsignadas Consulta[]
+  turnosAsignados    Turno[]
+  notasCreadas       Nota[]
+  bloqueosHorario    BloqueoHorario[]
+}
+
+enum Rol {
+  ADMIN
+  PROFESIONAL
+}
+
+// ============================================
+// CONSULTAS (Formulario público)
+// ============================================
+
+model Consulta {
+  id             String         @id @default(cuid())
+
+  // Datos del problema
+  tipoProblema   String         // Clave del tipo de problema
+  especialidad   String         // Especialidad relacionada
+  descripcion    String         @db.Text
+  urgente        Boolean        @default(false)
+
+  // Datos del contacto
+  nombre         String
+  email          String
+  telefono       String
+  localidad      String?
+
+  // Gestión interna
+  estado         EstadoConsulta @default(NUEVA)
+  profesionalId  String?
+  profesional    Usuario?       @relation(fields: [profesionalId], references: [id])
+
+  // Legal
+  aceptaTerminos     Boolean
+  disclaimerLeido    Boolean
+
+  // Timestamps
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relaciones
+  notas          Nota[]
+  turno          Turno?
+
+  @@index([estado])
+  @@index([profesionalId])
+  @@index([tipoProblema])
+}
+
+enum EstadoConsulta {
+  NUEVA
+  ASIGNADA
+  EN_PROCESO
+  ATENDIDA
+  CERRADA
+}
+
+// ============================================
+// TURNOS
+// ============================================
+
+model Turno {
+  id               String      @id @default(cuid())
+
+  // Relación con consulta
+  consultaId       String      @unique
+  consulta         Consulta    @relation(fields: [consultaId], references: [id], onDelete: Cascade)
+
+  // Asignación
+  profesionalId    String?
+  profesional      Usuario?    @relation(fields: [profesionalId], references: [id])
+
+  // Datos del turno
+  modalidad        Modalidad
+  fechaPreferida   DateTime
+  horarioPreferido String      // "manana" | "tarde"
+  fechaConfirmada  DateTime?
+
+  // Estado
+  estado           EstadoTurno @default(PENDIENTE)
+  motivoRechazo    String?
+
+  // Timestamps
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([estado])
+  @@index([profesionalId])
+  @@index([fechaPreferida])
+}
+
+enum Modalidad {
+  PRESENCIAL
+  VIRTUAL
+}
+
+enum EstadoTurno {
+  PENDIENTE
+  CONFIRMADO
+  RECHAZADO
+  COMPLETADO
+  CANCELADO
+}
+
+// ============================================
+// NOTAS INTERNAS
+// ============================================
+
+model Nota {
+  id         String   @id @default(cuid())
+
+  consultaId String
+  consulta   Consulta @relation(fields: [consultaId], references: [id], onDelete: Cascade)
+
+  autorId    String
+  autor      Usuario  @relation(fields: [autorId], references: [id])
+
+  contenido  String   @db.Text
+
+  createdAt  DateTime @default(now())
+
+  @@index([consultaId])
+}
+
+// ============================================
+// BLOQUEO DE HORARIOS
+// ============================================
+
+model BloqueoHorario {
+  id            String   @id @default(cuid())
+
+  profesionalId String
+  profesional   Usuario  @relation(fields: [profesionalId], references: [id], onDelete: Cascade)
+
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  motivo        String?
+
+  createdAt     DateTime @default(now())
+
+  @@index([profesionalId])
+  @@index([fechaInicio, fechaFin])
+}
+
+// ============================================
+// ESPECIALIDADES (Contenido editable)
+// ============================================
+
+model Especialidad {
+  id               String   @id @default(cuid())
+  nombre           String
+  slug             String   @unique
+  descripcionCorta String
+  descripcionLarga String   @db.Text
+  icono            String?
+  problemasComunes String[]
+  orden            Int      @default(0)
+  activo           Boolean  @default(true)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ============================================
+// CONFIGURACION DEL SITIO
+// ============================================
+
+model Configuracion {
+  id        String   @id @default(cuid())
+  clave     String   @unique
+  valor     String   @db.Text
+  tipo      String   @default("text") // "text" | "json" | "html"
+
+  updatedAt DateTime @updatedAt
+}
