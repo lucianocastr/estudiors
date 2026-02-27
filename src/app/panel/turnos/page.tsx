@@ -3,7 +3,6 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Video, Phone, Mail } from "lucide-react";
 
 async function getOrganizacionId(usuarioId: string): Promise<string | null> {
@@ -34,21 +33,19 @@ export default async function TurnosPage() {
 
   const turnos = await getTurnos(organizacionId);
 
-  const estadoBadgeVariant = (estado: string) => {
-    switch (estado) {
-      case "PENDIENTE":
-        return "default";
-      case "CONFIRMADO":
-        return "outline";
-      case "RECHAZADO":
-        return "destructive";
-      case "COMPLETADO":
-        return "secondary";
-      case "CANCELADO":
-        return "secondary";
-      default:
-        return "secondary";
-    }
+  const TURNO_ESTADO_LABELS: Record<string, string> = {
+    PENDIENTE: "Pendiente",
+    CONFIRMADO: "Confirmado",
+    RECHAZADO: "Rechazado",
+    COMPLETADO: "Completado",
+    CANCELADO: "Cancelado",
+  };
+  const TURNO_ESTADO_COLORS: Record<string, string> = {
+    PENDIENTE: "bg-yellow-100 text-yellow-800",
+    CONFIRMADO: "bg-green-100 text-green-800",
+    RECHAZADO: "bg-red-100 text-red-800",
+    COMPLETADO: "bg-blue-100 text-blue-800",
+    CANCELADO: "bg-gray-100 text-gray-600",
   };
 
   return (
@@ -89,9 +86,9 @@ export default async function TurnosPage() {
                       )}
                     </CardDescription>
                   </div>
-                  <Badge variant={estadoBadgeVariant(turno.estado)}>
-                    {turno.estado}
-                  </Badge>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${TURNO_ESTADO_COLORS[turno.estado] ?? "bg-gray-100 text-gray-600"}`}>
+                    {TURNO_ESTADO_LABELS[turno.estado] ?? turno.estado}
+                  </span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

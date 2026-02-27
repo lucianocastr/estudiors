@@ -113,15 +113,16 @@ model Organizacion {
   updatedAt     DateTime         @updatedAt
   deletedAt     DateTime?
 
-  miembros      OrganizacionMiembro[]
-  contactos     Contacto[]
-  consultas     Consulta[]
-  asignaciones  ConsultaAsignacion[]
-  eventos       ConsultaEvento[]
-  turnos        Turno[]
-  notas         Nota[]
-  emailCola     EmailCola[]
-  configuraciones Configuracion[]
+  miembros             OrganizacionMiembro[]
+  contactos            Contacto[]
+  consultas            Consulta[]
+  asignaciones         ConsultaAsignacion[]
+  eventos              ConsultaEvento[]
+  turnos               Turno[]
+  notas                Nota[]
+  emailCola            EmailCola[]
+  configuraciones      Configuracion[]
+  casosRestructuracion CasoRestructuracion[]
 
   @@index([slug])
   @@index([deletedAt])
@@ -153,6 +154,9 @@ model Usuario {
   asignacionesRecibidas ConsultaAsignacion[]  @relation("AsignadoA")
   eventosCreados        ConsultaEvento[]
   bloqueosHorario       BloqueoHorario[]
+  casosResponsable      CasoRestructuracion[] @relation("CasosResponsable")
+  intervencionesCRP     IntervencionCRP[]     @relation("IntervencionesCreadas")
+  alertasCRP            AlertaCRP[]           @relation("AlertasAsignadas")
 
   @@index([email])
   @@index([deletedAt])
@@ -210,7 +214,8 @@ model Contacto {
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
 
-  consultas      Consulta[]
+  consultas            Consulta[]
+  casosRestructuracion CasoRestructuracion[]
 
   @@index([organizacionId])
   @@index([organizacionId, email])  // Deduplicación
@@ -443,6 +448,573 @@ model Configuracion {
   updatedAt      DateTime     @updatedAt
 
   @@unique([organizacionId, clave])
+}
+
+// ============================================
+// CRP — ENUMS (prefijo CRP para evitar colisiones)
+// ============================================
+
+// ── Caso ──────────────────────────────────────────────────────────────────────
+
+enum CRPEstadoCaso {
+  DIAGNOSTICO
+  EN_ANALISIS
+  ESTRATEGIA
+  NEGOCIACION
+  IMPLEMENTACION
+  JUDICIAL
+  SUSPENDIDO
+  CERRADO_EXITOSO
+  CERRADO_ABANDONADO
+  ARCHIVADO
+}
+
+enum CRPNivelUrgencia {
+  BAJO
+  MEDIO
+  ALTO
+  CRITICO
+}
+
+enum CRPNivelExposicion {
+  BAJO
+  MEDIO
+  ALTO
+  TOTAL
+}
+
+enum CRPObjetivoCliente {
+  SALIR_RAPIDO
+  MINIMIZAR_COSTO
+  PROTEGER_BIENES
+  MIXTO
+}
+
+enum CRPSituacionLaboral {
+  RELACION_DEPENDENCIA
+  AUTONOMO
+  DESOCUPADO
+  JUBILADO
+  OTRO
+}
+
+enum CRPNivelSocioeconomico {
+  BAJO
+  MEDIO
+  MEDIO_ALTO
+  ALTO
+}
+
+enum CRPSituacionBCRA {
+  NORMAL        // Situación 1
+  RIESGO_BAJO   // Situación 2
+  DEFICIENTE    // Situación 3
+  DUDOSO        // Situación 4
+  IRRECUPERABLE // Situación 5
+}
+
+enum CRPEstadoInhibicion {
+  SIN_INHIBICION
+  VIGENTE
+  EN_GESTION_LEVANTAMIENTO
+  LEVANTADA
+}
+
+// ── Deuda ─────────────────────────────────────────────────────────────────────
+
+enum CRPTipoDeuda {
+  TARJETA
+  PRESTAMO_PERSONAL
+  DESCUBIERTO
+  HIPOTECA
+  PRENDA
+  OTRO
+}
+
+enum CRPEstadoDeuda {
+  ACTIVA
+  EN_NEGOCIACION
+  PROPUESTA_ENVIADA
+  CONTRAOFERTA_RECIBIDA
+  ACUERDO_VERBAL
+  ACUERDO_FORMALIZADO
+  EN_CUMPLIMIENTO
+  JUDICIALIZADA
+  CERRADA
+  ABANDONADA
+}
+
+enum CRPRiesgoJudicial {
+  NULO
+  BAJO
+  MEDIO
+  ALTO
+  INMINENTE
+}
+
+enum CRPEstadoPrescricion {
+  VIGENTE
+  PROXIMA       // < 90 días → alerta automática CRITICA
+  PRESCRIPTA
+  INTERRUMPIDA
+  SUSPENDIDA
+}
+
+enum CRPEstadoMediacion {
+  NO_APLICA
+  NO_INICIADA
+  NOTIFICADA
+  EN_CURSO
+  ACUERDO
+  FRACASADA
+}
+
+// ── Patrimonio ────────────────────────────────────────────────────────────────
+
+enum CRPTipoBien {
+  INMUEBLE
+  VEHICULO
+  FONDO_COMERCIO
+  CREDITO_A_FAVOR
+  BIEN_MUEBLE_REGISTRABLE
+  OTRO
+}
+
+enum CRPRiesgoRevocatoria {
+  NULO
+  BAJO
+  MEDIO
+  ALTO
+}
+
+// ── Escenarios ────────────────────────────────────────────────────────────────
+
+enum CRPTipoEscenario {
+  REFINANCIAR
+  PRESTAMO_EXTERNO
+  ESPERAR_QUITA
+  VENDER_ACTIVO
+  IMPUGNAR_INTERESES
+  CONCURSO_PREVENTIVO
+  ACUERDO_EXTRAJUDICIAL
+  COMBINADO
+}
+
+enum CRPEstadoEscenario {
+  BORRADOR
+  PRESENTADO
+  ACEPTADO
+  DESCARTADO
+}
+
+enum CRPRiesgoEscenario {
+  BAJO
+  MEDIO
+  ALTO
+}
+
+// ── Intervenciones ────────────────────────────────────────────────────────────
+
+enum CRPTipoIntervencion {
+  LLAMADA
+  REUNION
+  PROPUESTA_ENVIADA
+  CONTRAOFERTA_RECIBIDA
+  DOCUMENTO_ENVIADO
+  RESPUESTA_BANCO
+  AUDIENCIA_MEDIACION
+  PRESENTACION_JUDICIAL
+  NOTA_INTERNA
+  OTRO
+}
+
+// ── Honorarios ────────────────────────────────────────────────────────────────
+
+enum CRPTipoServicio {
+  CONSULTA
+  DIAGNOSTICO
+  NEGOCIACION
+  LITIGIO
+  COMBINADO
+}
+
+enum CRPEstadoPago {
+  PENDIENTE
+  PARCIAL
+  PAGADO
+  INCOBRABLE
+}
+
+// ── Alertas ───────────────────────────────────────────────────────────────────
+
+enum CRPTipoAlerta {
+  PRESCRIPCION_PROXIMA
+  PRESCRIPCION_VENCIDA
+  AUDIENCIA_MEDIACION
+  VENCIMIENTO_PROPUESTA
+  FOLLOW_UP
+  REVISION_CASO
+  HONORARIO_VENCIDO
+  INHIBICION_ACTIVA
+  CUSTOM
+}
+
+enum CRPPrioridadAlerta {
+  BAJA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+enum CRPEstadoAlerta {
+  PENDIENTE
+  VISTA
+  RESUELTA
+  DESCARTADA
+}
+
+// ============================================
+// CRP — MODELOS
+// ============================================
+
+model CasoRestructuracion {
+  id             String   @id @default(cuid())
+  numeroCaso     String   @unique // "CRP-2024-0001"
+  organizacionId String
+  contactoId     String
+  abogadoId      String
+
+  // Clasificación estratégica
+  estado              CRPEstadoCaso      @default(DIAGNOSTICO)
+  nivelUrgencia       CRPNivelUrgencia   @default(MEDIO)
+  nivelExposicion     CRPNivelExposicion @default(MEDIO)
+  objetivoCliente     CRPObjetivoCliente?
+  situacionLaboral    CRPSituacionLaboral?
+  nivelSocioeconomico CRPNivelSocioeconomico?
+
+  // Datos financiero-legales del cliente
+  cuit          String?
+  estadoBCRA    CRPSituacionBCRA?
+  historialBCRA Json? // [{ fecha: string, situacion: string, entidad: string }]
+
+  // Inhibición general de bienes
+  estadoInhibicion   CRPEstadoInhibicion @default(SIN_INHIBICION)
+  juzgadoInhibicion  String?
+  acreedorInhibicion String?
+  fechaInhibicion    DateTime?
+
+  // Diagnóstico y estrategia
+  // JSON con keys: prescripcionRevisada, cesionVerificada, interesesEvaluados,
+  // mediacionNotificada, inhibicionConsultada, revocatoriaEvaluada,
+  // bienFamiliaInscripto, codeudoresIdentificados, ingresoFormal
+  checklistDiagnostico Json?
+  recomendacionTecnica String? @db.Text
+
+  // Ciclo de vida
+  fechaApertura DateTime  @default(now())
+  fechaCierre   DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relaciones
+  organizacion Organizacion  @relation(fields: [organizacionId], references: [id])
+  contacto     Contacto      @relation(fields: [contactoId], references: [id])
+  abogado      Usuario       @relation("CasosResponsable", fields: [abogadoId], references: [id])
+
+  deudas              DeudaBancaria[]
+  bienes              BienPatrimonial[]
+  analisisFinancieros AnalisisFinanciero[]
+  escenarios          EscenarioEstrategico[]
+  intervenciones      IntervencionCRP[]
+  honorarios          HonorarioCRP[]
+  alertas             AlertaCRP[]
+
+  @@index([organizacionId])
+  @@index([organizacionId, estado])
+  @@index([contactoId])
+  @@index([abogadoId])
+  @@index([organizacionId, nivelUrgencia])
+  @@index([deletedAt])
+}
+
+model DeudaBancaria {
+  id     String @id @default(cuid())
+  casoId String
+
+  // Acreedor — separado para cubrir cesión de cartera
+  acreedorOriginal         String
+  acreedorActual           String
+  fueCedida                Boolean  @default(false)
+  fechaCesion              DateTime?
+  notificacionCesionValida Boolean? // ¿el cliente fue notificado válidamente?
+
+  // Caracterización
+  tipoDeuda   CRPTipoDeuda
+  estadoDeuda CRPEstadoDeuda  @default(ACTIVA)
+  situacionBCRA CRPSituacionBCRA?
+  fechaMora   DateTime?
+  // diasMora → calculado en runtime
+
+  // Composición económica completa
+  capitalOriginal        Decimal @db.Decimal(14, 2)
+  capitalActual          Decimal @db.Decimal(14, 2)
+  interesesAcumulados    Decimal @db.Decimal(14, 2) @default(0)
+  punitatorios           Decimal @db.Decimal(14, 2) @default(0)
+  totalReclamado         Decimal @db.Decimal(14, 2) // capital + intereses + punit.
+  costasJudiciales       Decimal @db.Decimal(14, 2) @default(0)
+  honorariosAbogadoBanco Decimal @db.Decimal(14, 2) @default(0)
+  // totalConCostas → calculado: totalReclamado + costas + honorariosAbogadoBanco
+
+  // Prescripción — variable estratégica crítica
+  plazoPrescricionMeses Int?              // TARJETA=36, PRESTAMO=60, HIPOTECA=120
+  fechaInicioComputo    DateTime?         // generalmente = fechaMora
+  fechaPrescricion      DateTime?         // calculado al guardar
+  estadoPrescricion     CRPEstadoPrescricion @default(VIGENTE)
+  causaInterrupcion     String?           // "Demanda iniciada 15/03/2023"
+
+  // Riesgo y negociación
+  riesgoJudicial          CRPRiesgoJudicial @default(BAJO)
+  escenarioQuitaEstimado  Decimal?          @db.Decimal(5, 2) // % de quita
+  propuestaRefinanciacion String?           @db.Text
+  montoAcordado           Decimal?          @db.Decimal(14, 2)
+
+  // Mediación prejudicial con fechas para alertas automáticas
+  estadoMediacion      CRPEstadoMediacion @default(NO_APLICA)
+  fechaNotificacionMed DateTime?
+  fechaAudienciaMed    DateTime?          // → genera alerta AUDIENCIA_MEDIACION CRITICA
+  resultadoMediacion   String?
+
+  // Expediente judicial
+  nroExpedienteJudicial String?
+  juzgado               String?
+  fuero                 String? // "Comercial" / "Civil" / "Federal"
+  abogadoBanco          String?
+
+  observaciones String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  caso           CasoRestructuracion  @relation(fields: [casoId], references: [id])
+  intervenciones IntervencionCRP[]
+  alertas        AlertaCRP[]
+  escenarios     EscenarioDeuda[]
+
+  @@index([casoId])
+  @@index([casoId, estadoDeuda])
+  @@index([casoId, estadoPrescricion])
+  @@index([fechaAudienciaMed])
+  @@index([fechaPrescricion])
+}
+
+model BienPatrimonial {
+  id     String @id @default(cuid())
+  casoId String
+
+  tipo          CRPTipoBien
+  descripcion   String
+  valorEstimado Decimal @db.Decimal(14, 2)
+
+  // Características jurídicas
+  esRegistrable Boolean @default(false)
+  esEmbargable  Boolean @default(true)
+  esBienFamilia Boolean @default(false) // vivienda única inscripta → inembargable
+
+  // Cargas y garantías
+  tieneGarantia Boolean @default(false)
+  garantiaTipo  String?
+  tienePrenda   Boolean @default(false)
+  tieneCodeudor Boolean @default(false)
+  codeudorNombre String?
+
+  // Riesgo de acción revocatoria (Arts. 338-342 CCCN)
+  riesgoRevocatoria       CRPRiesgoRevocatoria @default(NULO)
+  motivoRiesgoRevocatoria String?
+
+  observaciones String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  caso      CasoRestructuracion  @relation(fields: [casoId], references: [id])
+  escenarios EscenarioDeuda[]
+
+  @@index([casoId])
+  @@index([casoId, tipo])
+}
+
+model AnalisisFinanciero {
+  id        String @id @default(cuid())
+  casoId    String
+  version   Int    @default(1)
+
+  // Flujo mensual
+  ingresoMensualNeto      Decimal @db.Decimal(14, 2)
+  egresosFijos            Decimal @db.Decimal(14, 2) @default(0)
+  compromisoMensualDeudas Decimal @db.Decimal(14, 2) @default(0)
+  // flujoDisponible = ingresoMensualNeto - egresosFijos - compromisoMensualDeudas
+  // ratioDeudaIngreso = totalPasivosBruto / (ingresoMensualNeto * 12)
+
+  // Snapshot de pasivos al momento del análisis
+  totalPasivosBruto     Decimal @db.Decimal(14, 2) // suma capitalActual
+  totalPasivosReclamado Decimal @db.Decimal(14, 2) // suma totalReclamado
+  totalConCostas        Decimal @db.Decimal(14, 2) // suma totalConCostas
+
+  // Snapshot de activos
+  totalActivosEstimados Decimal @db.Decimal(14, 2)
+  // patrimonioNeto = totalActivosEstimados - totalPasivosBruto
+
+  // Capacidad de pago
+  capacidadPagoMensual Decimal @db.Decimal(14, 2)
+  mesesParaRegularizar Int?
+
+  observaciones String? @db.Text
+
+  // Append-only: solo createdAt, sin updatedAt
+  fechaAnalisis DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  caso CasoRestructuracion @relation(fields: [casoId], references: [id])
+
+  @@unique([casoId, version])
+  @@index([casoId])
+}
+
+model EscenarioEstrategico {
+  id     String @id @default(cuid())
+  casoId String
+
+  nombre        String
+  tipoEscenario CRPTipoEscenario
+  descripcion   String?          @db.Text
+  estado        CRPEstadoEscenario @default(BORRADOR)
+
+  // Números del escenario
+  montoTotalPagar      Decimal  @db.Decimal(14, 2)
+  // ahorroVsReclamado → calculado runtime
+  plazoMeses           Int?
+  cuotaMensualEstimada Decimal? @db.Decimal(14, 2)
+
+  // Evaluación
+  riesgoEscenario CRPRiesgoEscenario @default(MEDIO)
+  ventajas        String?            @db.Text
+  desventajas     String?            @db.Text
+
+  // Decisión
+  recomendado       Boolean   @default(false) // marcado por abogado
+  seleccionado      Boolean   @default(false) // aprobado por cliente
+  fechaPresentacion DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  caso          CasoRestructuracion @relation(fields: [casoId], references: [id])
+  deudasYBienes EscenarioDeuda[]
+
+  @@index([casoId])
+  @@index([casoId, estado])
+}
+
+// Pivot M:N: escenario ↔ deudas y bienes involucrados
+model EscenarioDeuda {
+  id          String @id @default(cuid())
+  escenarioId String
+  deudaId     String?
+  bienId      String?
+  rol         String? // "deuda principal" / "bien a vender" / "garantía"
+
+  escenario EscenarioEstrategico @relation(fields: [escenarioId], references: [id])
+  deuda     DeudaBancaria?       @relation(fields: [deudaId], references: [id])
+  bien      BienPatrimonial?     @relation(fields: [bienId], references: [id])
+
+  @@index([escenarioId])
+  @@index([deudaId])
+  @@index([bienId])
+}
+
+model IntervencionCRP {
+  id      String @id @default(cuid())
+  casoId  String
+  deudaId String?
+  usuarioId String
+
+  tipoIntervencion   CRPTipoIntervencion
+  fecha              DateTime
+  entidadInvolucrada String? // banco, juzgado, mediador
+  descripcion        String  @db.Text
+  resultado          String? @db.Text
+  documentoUrl       String?
+
+  requiereFollowUp   Boolean   @default(false)
+  fechaFollowUp      DateTime? // → genera alerta FOLLOW_UP
+  followUpCompletado Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+
+  caso    CasoRestructuracion @relation(fields: [casoId], references: [id])
+  deuda   DeudaBancaria?      @relation(fields: [deudaId], references: [id])
+  usuario Usuario             @relation("IntervencionesCreadas", fields: [usuarioId], references: [id])
+
+  @@index([casoId])
+  @@index([casoId, tipoIntervencion])
+  @@index([deudaId])
+  @@index([fechaFollowUp])
+}
+
+model HonorarioCRP {
+  id     String @id @default(cuid())
+  casoId String
+
+  tipoServicio      CRPTipoServicio
+  etapa             String          // "Negociación Banco Galicia"
+  honorarioPactado  Decimal         @db.Decimal(14, 2)
+  honorarioVariable Decimal?        @db.Decimal(14, 2)
+  criterioVariable  String?         // "10% del ahorro neto obtenido"
+
+  montoFacturado Decimal       @db.Decimal(14, 2) @default(0)
+  montoPercibido Decimal       @db.Decimal(14, 2) @default(0)
+  // saldo → calculado: montoFacturado - montoPercibido
+  estadoPago     CRPEstadoPago @default(PENDIENTE)
+  fechaVencimiento DateTime?   // → genera alerta HONORARIO_VENCIDO
+
+  observaciones String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  caso CasoRestructuracion @relation(fields: [casoId], references: [id])
+
+  @@index([casoId])
+  @@index([casoId, estadoPago])
+  @@index([fechaVencimiento])
+}
+
+model AlertaCRP {
+  id                String @id @default(cuid())
+  casoId            String
+  deudaId           String?
+  usuarioAsignadoId String?
+
+  tipoAlerta  CRPTipoAlerta
+  fechaAlerta DateTime
+  descripcion String
+  prioridad   CRPPrioridadAlerta @default(MEDIA)
+  estado      CRPEstadoAlerta    @default(PENDIENTE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  caso            CasoRestructuracion @relation(fields: [casoId], references: [id])
+  deuda           DeudaBancaria?      @relation(fields: [deudaId], references: [id])
+  usuarioAsignado Usuario?            @relation("AlertasAsignadas", fields: [usuarioAsignadoId], references: [id])
+
+  @@index([casoId])
+  @@index([casoId, estado])
+  @@index([usuarioAsignadoId, estado])
+  @@index([fechaAlerta, estado])
+  @@index([prioridad, estado])
 }
 
 // ============================================

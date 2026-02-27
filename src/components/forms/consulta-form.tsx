@@ -169,7 +169,7 @@ export function ConsultaForm() {
               </div>
               {index < pasos.length - 1 && (
                 <div
-                  className={`w-12 md:w-20 h-1 mx-1 ${
+                  className={`w-5 sm:w-12 md:w-20 h-1 mx-0.5 sm:mx-1 flex-shrink-0 ${
                     paso > p.id ? "bg-primary" : "bg-gray-200"
                   }`}
                 />

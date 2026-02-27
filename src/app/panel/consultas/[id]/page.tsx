@@ -200,18 +200,15 @@ export default async function ConsultaDetallePage({
                 <CardTitle className="text-base flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   Turno solicitado
-                  <Badge
-                    variant={
-                      consulta.turno.estado === "PENDIENTE"
-                        ? "default"
-                        : consulta.turno.estado === "CONFIRMADO"
-                        ? "outline"
-                        : "secondary"
-                    }
-                    className="ml-auto"
-                  >
-                    {consulta.turno.estado}
-                  </Badge>
+                  <span className={`ml-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    consulta.turno.estado === "CONFIRMADO" ? "bg-green-100 text-green-800" :
+                    consulta.turno.estado === "PENDIENTE"  ? "bg-yellow-100 text-yellow-800" :
+                    consulta.turno.estado === "RECHAZADO"  ? "bg-red-100 text-red-800" :
+                    consulta.turno.estado === "COMPLETADO" ? "bg-blue-100 text-blue-800" :
+                    "bg-gray-100 text-gray-600"
+                  }`}>
+                    {{ PENDIENTE: "Pendiente", CONFIRMADO: "Confirmado", RECHAZADO: "Rechazado", COMPLETADO: "Completado", CANCELADO: "Cancelado" }[consulta.turno.estado] ?? consulta.turno.estado}
+                  </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">

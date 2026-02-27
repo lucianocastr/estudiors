@@ -304,6 +304,63 @@ Listado de turnos ordenados por estado y fecha preferida. Cada card:
 
 ---
 
+#### `GET /panel/reestructuracion`
+**Archivo**: `src/app/panel/reestructuracion/page.tsx`
+
+Listado de casos CRP con KPIs superiores:
+
+**KPIs (4 cards)**:
+| Card | Dato |
+|------|------|
+| Casos activos | Count estados activos |
+| Deuda total | Suma monto total declarado |
+| Con alertas | Count casos con alertas pendientes |
+| Sin movimiento | Count con última actividad > 30 días |
+
+Tabla de casos: número, cliente, estado, deuda total, última actividad. Botón "Ver" → `/panel/reestructuracion/[id]`.
+
+---
+
+#### `GET /panel/reestructuracion/nuevo`
+**Archivo**: `src/app/panel/reestructuracion/nuevo/page.tsx`
+**Server Action**: `src/app/panel/reestructuracion/nuevo/actions.ts`
+
+Formulario de alta de nuevo caso CRP. Campos:
+- Datos del cliente (nombre, email, teléfono, CUIT)
+- Tipo de deuda predominante
+- Monto total declarado
+- Descripción del caso
+
+Server Action `crearCasoCRP`: crea `CRPCaso` con número autoincremental (`CRP-YYYY-NNNN`), vincula o crea `Contacto`, redirige a detalle.
+
+---
+
+#### `GET /panel/reestructuracion/[id]`
+**Archivo**: `src/app/panel/reestructuracion/[id]/page.tsx`
+**Server Actions**: `src/app/panel/reestructuracion/[id]/actions.ts`
+
+Vista detallada del caso CRP con 8 tabs navegables via `?tab=`:
+
+| Tab | Contenido |
+|-----|-----------|
+| `resumen` | Datos generales, estado, resumen financiero, alertas activas |
+| `pasivos` | Lista de deudas del cliente (AFIP, bancos, proveedores, etc.) |
+| `patrimonio` | Bienes del cliente (inmuebles, vehículos, cuentas, etc.) |
+| `financiero` | Análisis de capacidad de pago, ingresos, egresos |
+| `escenarios` | Comparativa de escenarios de reestructuración |
+| `intervenciones` | Historial de intervenciones del estudio en el caso |
+| `honorarios` | Referencia arancelaria Ley 9459 (Córdoba) — escala Art. 36 en Jus, tabla por tipo de trámite |
+| `alertas` | Alertas activas del caso con severidad y acción sugerida |
+
+**Server Actions del módulo CRP**:
+- `actualizarEstadoCRP` — cambia estado del caso
+- `agregarPasivo` — registra nueva deuda
+- `agregarBienPatrimonial` — registra nuevo bien
+- `agregarIntervenccion` — registra intervención del estudio
+- `agregarEscenario` — agrega escenario de reestructuración
+
+---
+
 ### API ROUTES
 
 ---
@@ -414,6 +471,20 @@ Configuracion         — Key/value por organización
 Especialidad          — Especialidades (preparado para CMS futuro)
 ```
 
+### Modelos CRP — Reestructuración de Pasivos (migración `20260226234026`)
+
+```
+CRPCaso               — Caso de reestructuración (número CRP-YYYY-NNNN, estado, tipo deuda)
+CRPPasivo             — Deuda individual del cliente (acreedor, monto, tipo, estado)
+CRPBienPatrimonial    — Bien del cliente (inmueble, vehículo, cuenta, etc.)
+CRPAnalisisFinanciero — Ingresos/egresos mensuales del cliente
+CRPEscenario          — Escenario de reestructuración propuesto
+CRPEscenarioCuota     — Detalle de cuotas por escenario
+CRPIntervencion       — Intervención del estudio en el caso
+CRPAlerta             — Alerta generada automáticamente o manual
+CRPHonorarioRegistro  — Registro de honorarios devengados por tipo de trámite
+```
+
 **Estados de consulta**: `NUEVA → EN_ANALISIS → CONTACTADO → CONVERTIDO → CERRADO`
 
 **Estados de turno**: `PENDIENTE → CONFIRMADO | RECHAZADO → COMPLETADO | CANCELADO`
@@ -481,13 +552,21 @@ src/
 │   │       └── terminos/page.tsx
 │   ├── panel/                   # Panel CRM (protegido por NextAuth)
 │   │   ├── layout.tsx           # Nav lateral + header usuario + nav móvil
-│   │   ├── page.tsx             # Dashboard con estadísticas
+│   │   ├── page.tsx             # Dashboard con estadísticas + alertas CRP
 │   │   ├── consultas/
 │   │   │   ├── page.tsx         # Listado de consultas
 │   │   │   └── [id]/
 │   │   │       ├── page.tsx     # Detalle 2 columnas
 │   │   │       └── actions.ts   # Server Actions (estado, nota, turno)
-│   │   └── turnos/page.tsx      # Listado de turnos
+│   │   ├── turnos/page.tsx      # Listado de turnos
+│   │   └── reestructuracion/    # Módulo CRP
+│   │       ├── page.tsx         # Listado + KPIs
+│   │       ├── nuevo/
+│   │       │   ├── page.tsx     # Formulario nuevo caso
+│   │       │   └── actions.ts   # Server Action crearCasoCRP
+│   │       └── [id]/
+│   │           ├── page.tsx     # Detalle 8 tabs (?tab=)
+│   │           └── actions.ts   # Server Actions CRP
 │   ├── auth/
 │   │   ├── login/page.tsx       # Login con Google
 │   │   └── error/page.tsx       # Errores de auth
@@ -501,6 +580,8 @@ src/
 │   ├── ui/                      # shadcn/ui (Button, Card, Input, Select, etc.)
 │   ├── forms/
 │   │   └── consulta-form.tsx    # Formulario multi-paso con React Hook Form + Zod
+│   ├── panel/
+│   │   └── nav-links.tsx        # Client component: SidebarNavLinks + MobileNavLinks (usePathname)
 │   └── layout/
 │       ├── header.tsx           # Nav principal + monograma RS
 │       └── footer.tsx           # Footer oscuro
@@ -509,14 +590,20 @@ src/
 │   └── equipo.ts                # Profesionales del estudio
 ├── lib/
 │   ├── auth.ts                  # NextAuth v5 config, JWT, helpers (puedeAdministrar)
+│   ├── crp-utils.ts             # Módulo CRP: labels, colores, escala arancelaria, alertas
 │   ├── db.ts                    # Prisma client singleton (evita múltiples instancias en dev)
 │   ├── email.ts                 # Funciones de envío payload-based (sin tipos Prisma)
 │   ├── utils.ts                 # cn() helper (clsx + tailwind-merge)
 │   └── validators.ts            # Schemas Zod del formulario de consulta
 ├── middleware.ts                # Protección de rutas /panel (redirige a /auth/login)
-└── prisma/
-    ├── schema.prisma            # Modelos BD v2.0
-    └── seed.ts                  # Seed: crea organización y usuario admin inicial
+docs/
+├── manual-usuario.md            # Manual completo del sistema (flujos, panel, CRP)
+└── whatsapp-business-setup.md   # Guía de configuración WhatsApp Business App
+prisma/
+├── schema.prisma                # Modelos BD v2.0 + modelos CRP
+├── seed.ts                      # Seed: crea organización y usuario admin inicial
+└── migrations/                  # Historial de migraciones
+    └── 20260226234026_crp_reestructuracion_pasivos/
 ```
 
 ---
@@ -669,8 +756,18 @@ Y configurar el header del cron con `x-cron-token: <CRON_SECRET>` desde la confi
 
 ---
 
+## Documentación
+
+| Archivo | Descripción |
+|---------|-------------|
+| `docs/manual-usuario.md` | Manual completo del sistema: sitio público, panel CRM, módulo CRP (8 tabs), flujos de trabajo, estados, honorarios Ley 9459, FAQ |
+| `docs/whatsapp-business-setup.md` | Guía de configuración WhatsApp Business App: perfil, mensaje de bienvenida/ausencia, 7 respuestas rápidas, etiquetas, catálogo |
+
+---
+
 ## Fases de Desarrollo
 
 - **Fase 1** ✅ — Sitio público completo + formulario de consulta + identidad visual RS
 - **Fase 2** ✅ — Legal CRM v2.0: schema multi-tenant, panel completo, flujo Contacto→Consulta→Turno, Server Actions, cola de emails con backoff exponencial
+- **Fase 2.5** ✅ — Módulo CRP: Reestructuración de Pasivos (9 modelos BD, 3 rutas, 8 tabs, referencia arancelaria Ley 9459); QA UI panel (labels semánticos, nav activo); responsive público (hero mobile, stepper)
 - **Fase 3** — Panel de administración: métricas/embudo, gestión de usuarios del equipo, CMS de contenido, calendario de turnos con disponibilidad

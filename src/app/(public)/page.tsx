@@ -54,7 +54,7 @@ export default function HomePage() {
         />
 
         {/* Texto — panel izquierdo sobre overlay oscuro */}
-        <div className="relative z-10 px-10 sm:px-14 md:px-20 max-w-[56%]">
+        <div className="relative z-10 px-6 sm:px-14 md:px-20 max-w-[90%] sm:max-w-[72%] md:max-w-[58%]">
           <h1 className="font-display leading-none tracking-tight">
             <span className="block font-semibold text-white text-4xl sm:text-5xl md:text-[3.25rem] lg:text-[4rem] leading-tight">
               Romina Belén

@@ -33,21 +33,19 @@ export default async function ConsultasPage() {
 
   const consultas = await getConsultas(organizacionId);
 
-  const estadoBadgeVariant = (estado: string) => {
-    switch (estado) {
-      case "NUEVA":
-        return "default";
-      case "EN_ANALISIS":
-        return "secondary";
-      case "CONTACTADO":
-        return "outline";
-      case "CONVERTIDO":
-        return "default";
-      case "CERRADO":
-        return "secondary";
-      default:
-        return "secondary";
-    }
+  const ESTADO_LABELS: Record<string, string> = {
+    NUEVA: "Nueva",
+    EN_ANALISIS: "En análisis",
+    CONTACTADO: "Contactado",
+    CONVERTIDO: "Convertido",
+    CERRADO: "Cerrado",
+  };
+  const ESTADO_COLORS: Record<string, string> = {
+    NUEVA: "bg-blue-100 text-blue-800",
+    EN_ANALISIS: "bg-yellow-100 text-yellow-800",
+    CONTACTADO: "bg-purple-100 text-purple-800",
+    CONVERTIDO: "bg-green-100 text-green-800",
+    CERRADO: "bg-gray-100 text-gray-600",
   };
 
   return (
@@ -84,9 +82,9 @@ export default async function ConsultasPage() {
                       {consulta.especialidad} · {consulta.tipoProblema}
                     </CardDescription>
                   </div>
-                  <Badge variant={estadoBadgeVariant(consulta.estado)}>
-                    {consulta.estado.replace("_", " ")}
-                  </Badge>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ESTADO_COLORS[consulta.estado] ?? "bg-gray-100 text-gray-600"}`}>
+                    {ESTADO_LABELS[consulta.estado] ?? consulta.estado}
+                  </span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

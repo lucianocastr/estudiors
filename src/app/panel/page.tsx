@@ -10,6 +10,7 @@ import {
   AlertCircle,
   Clock,
   ArrowRight,
+  Briefcase,
 } from "lucide-react";
 
 async function getOrganizacionId(usuarioId: string): Promise<string | null> {
@@ -45,6 +46,20 @@ async function getEstadisticas(organizacionId: string) {
   };
 }
 
+async function getAlertasCRP(organizacionId: string) {
+  return prisma.alertaCRP.findMany({
+    where: {
+      estado: "PENDIENTE",
+      caso: { organizacionId, deletedAt: null },
+    },
+    orderBy: [{ prioridad: "desc" }, { fechaAlerta: "asc" }],
+    take: 5,
+    include: {
+      caso: { select: { numeroCaso: true, id: true, contacto: { select: { nombre: true } } } },
+    },
+  });
+}
+
 async function getUltimasConsultas(organizacionId: string) {
   return prisma.consulta.findMany({
     where: { organizacionId, deletedAt: null },
@@ -61,22 +76,25 @@ export default async function PanelDashboard() {
   const organizacionId = await getOrganizacionId(session.user.id);
   if (!organizacionId) return null;
 
-  const stats = await getEstadisticas(organizacionId);
-  const ultimasConsultas = await getUltimasConsultas(organizacionId);
+  const [stats, ultimasConsultas, alertasCRP] = await Promise.all([
+    getEstadisticas(organizacionId),
+    getUltimasConsultas(organizacionId),
+    getAlertasCRP(organizacionId),
+  ]);
 
-  const estadoBadgeVariant = (estado: string) => {
-    switch (estado) {
-      case "NUEVA":
-        return "default";
-      case "EN_ANALISIS":
-        return "secondary";
-      case "CONTACTADO":
-        return "outline";
-      case "CONVERTIDO":
-        return "default";
-      default:
-        return "secondary";
-    }
+  const CONSULTA_ESTADO_LABELS: Record<string, string> = {
+    NUEVA: "Nueva",
+    EN_ANALISIS: "En análisis",
+    CONTACTADO: "Contactado",
+    CONVERTIDO: "Convertido",
+    CERRADO: "Cerrado",
+  };
+  const CONSULTA_ESTADO_COLORS: Record<string, string> = {
+    NUEVA: "bg-blue-100 text-blue-800",
+    EN_ANALISIS: "bg-yellow-100 text-yellow-800",
+    CONTACTADO: "bg-purple-100 text-purple-800",
+    CONVERTIDO: "bg-green-100 text-green-800",
+    CERRADO: "bg-gray-100 text-gray-600",
   };
 
   return (
@@ -151,6 +169,56 @@ export default async function PanelDashboard() {
         </Card>
       </div>
 
+      {/* Widget alertas CRP */}
+      {alertasCRP.length > 0 && (
+        <Card className="border-orange-200">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-orange-600" />
+                <CardTitle className="text-base">Alertas — Reestructuración</CardTitle>
+                <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">
+                  {alertasCRP.length}
+                </Badge>
+              </div>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/panel/reestructuracion">
+                  Ver todos <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {alertasCRP.map((alerta) => (
+              <Link
+                key={alerta.id}
+                href={`/panel/reestructuracion/${alerta.caso.id}?tab=alertas`}
+                className="flex items-center justify-between p-3 border rounded-lg hover:bg-orange-50/50 transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <AlertCircle className={`h-4 w-4 flex-shrink-0 ${
+                    alerta.prioridad === "CRITICA" ? "text-red-600" :
+                    alerta.prioridad === "ALTA" ? "text-orange-600" : "text-yellow-600"
+                  }`} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{alerta.descripcion}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {alerta.caso.numeroCaso} · {alerta.caso.contacto.nombre}
+                    </p>
+                  </div>
+                </div>
+                <Badge variant="outline" className={`flex-shrink-0 text-xs ${
+                  alerta.prioridad === "CRITICA" ? "border-red-300 text-red-700" :
+                  alerta.prioridad === "ALTA" ? "border-orange-300 text-orange-700" : ""
+                }`}>
+                  {alerta.prioridad}
+                </Badge>
+              </Link>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Últimas consultas */}
       <Card>
         <CardHeader>
@@ -191,16 +259,16 @@ export default async function PanelDashboard() {
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground truncate">
-                      {consulta.descripcion.substring(0, 100)}...
+                      {consulta.descripcion?.substring(0, 100) ?? ""}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {new Date(consulta.createdAt).toLocaleDateString("es-AR")}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 ml-4">
-                    <Badge variant={estadoBadgeVariant(consulta.estado)}>
-                      {consulta.estado.replace("_", " ")}
-                    </Badge>
+                  <div className="flex items-center gap-2 ml-4 flex-shrink-0">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${CONSULTA_ESTADO_COLORS[consulta.estado] ?? "bg-gray-100 text-gray-600"}`}>
+                      {CONSULTA_ESTADO_LABELS[consulta.estado] ?? consulta.estado}
+                    </span>
                     <Button asChild variant="ghost" size="sm">
                       <Link href={`/panel/consultas/${consulta.id}`}>
                         Ver
