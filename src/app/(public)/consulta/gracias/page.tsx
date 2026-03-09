@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, Mail, Phone, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Consulta Enviada",
@@ -67,31 +67,6 @@ export default function GraciasPage() {
                   </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="text-left mb-8 bg-gray-50">
-            <CardHeader>
-              <CardTitle className="text-lg">¿Tenés alguna urgencia?</CardTitle>
-              <CardDescription>
-                Si tu situación es urgente, podés contactarnos directamente:
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <a
-                href="tel:+543547000000"
-                className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-              >
-                <Phone className="h-4 w-4" />
-                +54 3547 XX-XXXX
-              </a>
-              <a
-                href="mailto:contacto@estudio.com"
-                className="flex items-center gap-3 text-sm hover:text-primary transition-colors"
-              >
-                <Mail className="h-4 w-4" />
-                contacto@estudio.com
-              </a>
             </CardContent>
           </Card>
 
