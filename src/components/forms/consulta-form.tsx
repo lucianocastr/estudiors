@@ -23,20 +23,16 @@ import {
 } from "@/components/ui/form";
 import { especialidades, getEspecialidadByProblema } from "@/content/especialidades";
 import { consultaConTurnoSchema, type ConsultaConTurnoInput } from "@/lib/validators";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Loader2,
-  CheckCircle2,
-  AlertTriangle,
-  Calendar,
-} from "lucide-react";
+import { Calendar as CalendarIcon, ArrowLeft, ArrowRight, Loader2, CheckCircle2, AlertTriangle, Calendar } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { es } from "date-fns/locale";
 
 const pasos = [
   { id: 1, nombre: "Tipo de problema" },
   { id: 2, nombre: "Descripción" },
   { id: 3, nombre: "Datos de contacto" },
-  { id: 4, nombre: "Turno (opcional)" },
+  { id: 4, nombre: "Turno" },
   { id: 5, nombre: "Confirmación" },
 ];
 
@@ -68,7 +64,6 @@ export function ConsultaForm() {
       localidad: "",
       aceptaTerminos: false,
       disclaimerLeido: false,
-      solicitaTurno: false,
       turno: {
         modalidad: undefined,
         fechaPreferida: "",
@@ -78,7 +73,6 @@ export function ConsultaForm() {
   });
 
   const tipoProblema = form.watch("tipoProblema");
-  const solicitaTurno = form.watch("solicitaTurno");
 
   // Obtener la especialidad basada en el problema seleccionado
   const especialidadSeleccionada = tipoProblema
@@ -99,7 +93,7 @@ export function ConsultaForm() {
         camposValidar = ["nombre", "email", "telefono"];
         break;
       case 4:
-        // El turno es opcional, no validamos
+        camposValidar = ["turno"] as (keyof ConsultaConTurnoInput)[];
         break;
     }
 
@@ -144,12 +138,6 @@ export function ConsultaForm() {
     }
   };
 
-  // Obtener fecha mínima (mañana)
-  const getFechaMinima = () => {
-    const manana = new Date();
-    manana.setDate(manana.getDate() + 1);
-    return manana.toISOString().split("T")[0];
-  };
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -384,7 +372,7 @@ export function ConsultaForm() {
                   name="localidad"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Localidad (opcional)</FormLabel>
+                      <FormLabel>Localidad</FormLabel>
                       <FormControl>
                         <Input placeholder="Alta Gracia" {...field} />
                       </FormControl>
@@ -402,37 +390,14 @@ export function ConsultaForm() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  Solicitar turno
+                  Turno
                 </CardTitle>
                 <CardDescription>
-                  Si querés, podés solicitar un turno para una entrevista. Es
-                  opcional, también podemos contactarte después.
+                  Completá los datos para coordinar tu entrevista con la abogada.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="solicitaTurno"
-                  render={({ field }) => (
-                    <FormItem className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Quiero solicitar un turno</FormLabel>
-                        <FormDescription>
-                          Te contactaremos para confirmar el día y horario
-                        </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                {solicitaTurno && (
-                  <div className="space-y-4 pt-4 border-t">
+                  <div className="space-y-4">
                     <FormField
                       control={form.control}
                       name="turno.modalidad"
@@ -463,22 +428,50 @@ export function ConsultaForm() {
                     <FormField
                       control={form.control}
                       name="turno.fechaPreferida"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Fecha preferida</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="date"
-                              min={getFechaMinima()}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Seleccioná una fecha a partir de mañana
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+                      render={({ field }) => {
+                        const parsedDate = field.value
+                          ? (() => {
+                              const [d, m, y] = field.value.split("/").map(Number);
+                              return d && m && y ? new Date(y, m - 1, d) : undefined;
+                            })()
+                          : undefined;
+                        return (
+                          <FormItem>
+                            <FormLabel>Fecha preferida</FormLabel>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    className="w-full justify-start text-left font-normal"
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {field.value || <span className="text-muted-foreground">Seleccioná una fecha</span>}
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <CalendarComponent
+                                  mode="single"
+                                  selected={parsedDate}
+                                  onSelect={(date) => {
+                                    if (date) {
+                                      const dd = String(date.getDate()).padStart(2, "0");
+                                      const mm = String(date.getMonth() + 1).padStart(2, "0");
+                                      const yyyy = date.getFullYear();
+                                      field.onChange(`${dd}/${mm}/${yyyy}`);
+                                    }
+                                  }}
+                                  disabled={(date) => date <= new Date()}
+                                  locale={es}
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
                     />
 
                     <FormField
@@ -508,7 +501,6 @@ export function ConsultaForm() {
                       )}
                     />
                   </div>
-                )}
               </CardContent>
             </Card>
           )}
@@ -545,21 +537,19 @@ export function ConsultaForm() {
                     <span className="text-muted-foreground">Teléfono:</span>
                     <p className="font-medium">{form.getValues("telefono")}</p>
                   </div>
-                  {solicitaTurno && (
-                    <div>
-                      <span className="text-muted-foreground">Turno solicitado:</span>
-                      <p className="font-medium">
-                        {form.getValues("turno.modalidad") === "PRESENCIAL"
-                          ? "Presencial"
-                          : "Virtual"}{" "}
-                        - {form.getValues("turno.fechaPreferida")} (
-                        {form.getValues("turno.horarioPreferido") === "manana"
-                          ? "Mañana"
-                          : "Tarde"}
-                        )
-                      </p>
-                    </div>
-                  )}
+                  <div>
+                    <span className="text-muted-foreground">Turno:</span>
+                    <p className="font-medium">
+                      {form.getValues("turno.modalidad") === "PRESENCIAL"
+                        ? "Presencial"
+                        : "Virtual"}{" "}
+                      - {form.getValues("turno.fechaPreferida")} (
+                      {form.getValues("turno.horarioPreferido") === "manana"
+                        ? "Mañana"
+                        : "Tarde"}
+                      )
+                    </p>
+                  </div>
                 </div>
 
                 {/* Aviso legal */}

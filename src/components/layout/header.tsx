@@ -27,7 +27,7 @@ export function Header() {
           <div className="flex items-center gap-4">
             {/* WhatsApp */}
             <a
-              href="https://wa.me/5493513100760"
+              href="https://wa.me/5493518916246"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 hover:text-accent transition-colors"

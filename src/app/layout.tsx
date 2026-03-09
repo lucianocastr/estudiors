@@ -22,13 +22,14 @@ export const metadata: Metadata = {
     template: "%s | Estudio Jurídico RBS",
   },
   description:
-    "Estudio jurídico en Alta Gracia, Córdoba. Especialistas en Derecho Real y Sucesiones, Daños y Accidentes, Derecho de Familia, Previsional y Laboral.",
+    "Estudio jurídico en Alta Gracia, Córdoba. Especialistas en Derecho Real, Daños y Accidentes, Derecho de Familia, Previsional y Laboral.",
   keywords: [
     "abogados",
     "estudio juridico",
     "alta gracia",
     "cordoba",
-    "sucesiones",
+    "derecho real",
+    "usucapion",
     "accidentes de transito",
     "divorcios",
     "jubilaciones",
@@ -59,7 +60,7 @@ export default function RootLayout({
 
         {/* Botón flotante WhatsApp */}
         <a
-          href="https://wa.me/5493513100760"
+          href="https://wa.me/5493518916246"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Contactar por WhatsApp"

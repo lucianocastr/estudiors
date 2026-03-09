@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { especialidades, getEspecialidadBySlug } from "@/content/especialidades";
-import { ArrowRight, ArrowLeft, Info, HelpCircle } from "lucide-react";
+import { ArrowRight, ArrowLeft, Info } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -107,31 +107,6 @@ export default async function EspecialidadPage({ params }: PageProps) {
                 </Card>
               ))}
             </div>
-
-            {/* Preguntas frecuentes */}
-            {especialidad.preguntasFrecuentes.length > 0 && (
-              <div className="mb-12">
-                <h2 className="font-display text-2xl font-semibold mb-6 text-foreground flex items-center gap-2">
-                  <HelpCircle className="h-5 w-5 text-accent" />
-                  Preguntas Frecuentes
-                </h2>
-                <div className="space-y-3">
-                  {especialidad.preguntasFrecuentes.map((faq, index) => (
-                    <div
-                      key={index}
-                      className="border border-border/60 rounded-xl p-5 bg-card hover:border-accent/25 transition-colors"
-                    >
-                      <h3 className="font-medium text-sm mb-2 text-foreground">
-                        {faq.pregunta}
-                      </h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {faq.respuesta}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* CTA */}
             <div className="bg-secondary/50 rounded-2xl p-8 md:p-10 text-center border border-border/50">

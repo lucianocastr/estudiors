@@ -229,9 +229,6 @@ export default function HomePage() {
       {/* ── CTA Final ───────────────────────────────────────────── */}
       <section className="py-20 md:py-24 bg-secondary/60 border-y border-border/50">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-xs tracking-[0.2em] uppercase text-accent/70 mb-3 font-medium">
-            Consulta inicial sin cargo
-          </p>
           <h2 className="font-display text-3xl md:text-4xl font-semibold mb-4 text-foreground">
             ¿Tenés un problema legal?
           </h2>

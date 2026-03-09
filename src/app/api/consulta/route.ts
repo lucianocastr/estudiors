@@ -70,23 +70,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Si solicitó turno, crearlo
-    if (
-      data.solicitaTurno &&
-      data.turno?.modalidad &&
-      data.turno?.fechaPreferida &&
-      data.turno?.horarioPreferido
-    ) {
-      await prisma.turno.create({
-        data: {
-          consultaId: consulta.id,
-          organizacionId,
-          modalidad: data.turno.modalidad,
-          fechaPreferida: new Date(data.turno.fechaPreferida),
-          horarioPreferido: data.turno.horarioPreferido,
-        },
-      });
-    }
+    // Crear turno (siempre requerido)
+    const [dia, mes, anio] = data.turno.fechaPreferida.split("/").map(Number);
+    await prisma.turno.create({
+      data: {
+        consultaId: consulta.id,
+        organizacionId,
+        modalidad: data.turno.modalidad,
+        fechaPreferida: new Date(anio, mes - 1, dia),
+        horarioPreferido: data.turno.horarioPreferido,
+      },
+    });
 
     // Encolar emails (desacoplado del request — worker los procesa)
     await prisma.emailCola.createMany({

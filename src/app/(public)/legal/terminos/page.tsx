@@ -75,7 +75,7 @@ export default function TerminosPage() {
             </p>
 
             <p className="text-sm text-muted-foreground mt-8">
-              Última actualización: Enero 2025
+              Última actualización: Marzo 2026
             </p>
           </div>
         </div>

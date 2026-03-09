@@ -20,7 +20,7 @@ export type PayloadNuevaConsultaAdmin = {
   nombre: string;
   email: string;
   telefono: string;
-  localidad?: string;
+  localidad: string;
   especialidad: string;
   tipoProblema: string;
   descripcion: string;

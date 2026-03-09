@@ -4,6 +4,7 @@ import {
   Users,
   Clock,
   Briefcase,
+  Scroll,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,65 +22,93 @@ export interface Especialidad {
   descripcionCorta: string;
   descripcionLarga: string;
   problemas: TipoProblema[];
-  preguntasFrecuentes: { pregunta: string; respuesta: string }[];
 }
 
 export const especialidades: Especialidad[] = [
   {
-    id: "derecho-real-sucesiones",
-    nombre: "Derecho Real y Sucesiones",
-    slug: "derecho-real-sucesiones",
+    id: "derecho-real",
+    nombre: "Derecho Real",
+    slug: "derecho-real",
     icono: Home,
     descripcionCorta:
-      "Asesoramiento en temas de propiedades, herencias y trámites sucesorios.",
+      "Asesoramiento en juicio de usucapión, escrituraciones, acciones de reivindicación y posesiones.",
     descripcionLarga: `
-      Brindamos asesoramiento integral en cuestiones relacionadas con bienes inmuebles,
-      herencias y procesos sucesorios. Acompañamos a nuestros clientes en los trámites
-      necesarios para regularizar situaciones patrimoniales y proteger sus derechos sobre
-      bienes heredados o adquiridos.
+      Brindamos asesoramiento integral en cuestiones relacionadas con bienes inmuebles.
+      Acompañamos a nuestros clientes en los trámites necesarios para regularizar
+      situaciones patrimoniales y proteger sus derechos sobre bienes adquiridos,
+      poseídos o en conflicto.
     `,
     problemas: [
       {
-        id: "herencia-fallecimiento",
-        label: "Falleció un familiar y hay bienes",
-        descripcion: "Inicio de sucesión, declaratoria de herederos, partición de bienes",
+        id: "usucapion",
+        label: "Poseo un inmueble hace más de 20 años sin escritura",
+        descripcion: "Prescripción adquisitiva, regularización dominial, usucapión",
       },
       {
-        id: "venta-herencia",
+        id: "ocupacion-terreno",
+        label: "Me ocuparon un terreno",
+        descripcion: "Acción reivindicatoria, desalojo, recuperación de la posesión",
+      },
+      {
+        id: "boleto-compraventa",
+        label: "Compré un terreno por Boleto de compra y venta",
+        descripcion: "Escrituración, cumplimiento de contrato, regularización dominial",
+      },
+      {
+        id: "escrituracion",
+        label: "Necesito escriturar un inmueble",
+        descripcion: "Escrituración, gestión notarial, regularización de títulos",
+      },
+      {
+        id: "otro-real",
+        label: "Otro tema relacionado",
+        descripcion: "Otras consultas sobre derechos reales e inmuebles",
+      },
+    ],
+  },
+  {
+    id: "declaratoria-herederos-sucesiones",
+    nombre: "Declaratoria de Herederos y Sucesiones",
+    slug: "declaratoria-herederos-sucesiones",
+    icono: Scroll,
+    descripcionCorta:
+      "Inicio de sucesión, declaratoria de herederos, adjudicaciones y tracto abreviado.",
+    descripcionLarga: `
+      Acompañamos a las familias en el proceso sucesorio desde el fallecimiento del
+      causante hasta la adjudicación de los bienes. Gestionamos la declaratoria de
+      herederos, las adjudicaciones y el tracto sucesivo abreviado para la
+      regularización dominial, tanto en sucesiones extrajudiciales como judiciales.
+    `,
+    problemas: [
+      {
+        id: "inicio-sucesion",
+        label: "Falleció un familiar y hay bienes",
+        descripcion: "Inicio de sucesión, declaratoria de herederos, inventario y avalúo",
+      },
+      {
+        id: "adjudicacion-bienes",
+        label: "Necesito adjudicar los bienes de la sucesión",
+        descripcion: "Adjudicación de inmuebles y bienes, inscripción registral a nombre de los herederos",
+      },
+      {
+        id: "tracto-abreviado",
+        label: "El inmueble tiene varios dueños fallecidos encadenados",
+        descripcion: "Tracto sucesivo abreviado, regularización dominial de transmisiones no inscriptas",
+      },
+      {
+        id: "venta-bien-heredado",
         label: "Quiero vender un bien heredado",
-        descripcion: "Regularización de títulos, tracto sucesivo, venta de bienes de la sucesión",
+        descripcion: "Gestión para habilitar la venta, tracto abreviado previo, escrituración",
       },
       {
         id: "conflicto-herederos",
         label: "Tengo conflictos con otros herederos",
-        descripcion: "Mediación entre herederos, partición judicial, protección de derechos",
-      },
-      {
-        id: "testamento",
-        label: "Quiero hacer un testamento",
-        descripcion: "Redacción de testamento, planificación sucesoria, protección de bienes",
-      },
-      {
-        id: "usucapion",
-        label: "Ocupo un terreno hace años sin escritura",
-        descripcion: "Prescripción adquisitiva, regularización dominial, usucapión",
+        descripcion: "Protección de derechos hereditarios, partición judicial, mediación",
       },
       {
         id: "otro-sucesiones",
         label: "Otro tema relacionado",
-        descripcion: "Otras consultas sobre bienes o herencias",
-      },
-    ],
-    preguntasFrecuentes: [
-      {
-        pregunta: "¿Cuánto tiempo tengo para iniciar una sucesión?",
-        respuesta:
-          "No hay un plazo límite para iniciar la sucesión, pero es recomendable hacerlo lo antes posible para evitar complicaciones con los bienes.",
-      },
-      {
-        pregunta: "¿Qué documentos necesito para iniciar una sucesión?",
-        respuesta:
-          "Generalmente se necesita: partida de defunción, partidas de nacimiento de los herederos, títulos de los bienes, y documentación que acredite el vínculo familiar.",
+        descripcion: "Otras consultas sobre herencias y sucesiones",
       },
     ],
   },
@@ -91,10 +120,10 @@ export const especialidades: Especialidad[] = [
     descripcionCorta:
       "Reclamos por accidentes de tránsito y todo tipo de daños y perjuicios.",
     descripcionLarga: `
-      Representamos a víctimas de accidentes de tránsito y otros hechos que generen
-      daños y perjuicios. Gestionamos reclamos ante compañías de seguros y, de ser
-      necesario, iniciamos las acciones judiciales correspondientes para obtener una
-      justa reparación.
+      Brindamos asesoramiento y representación en todo tipo de siniestros viales y hechos
+      que generen daños y perjuicios, tanto a quienes los sufrieron como a quienes son
+      reclamados. Gestionamos negociaciones con compañías de seguros e iniciamos o
+      defendemos las acciones judiciales que cada situación requiera.
     `,
     problemas: [
       {
@@ -128,18 +157,6 @@ export const especialidades: Especialidad[] = [
         descripcion: "Otras consultas sobre daños y accidentes",
       },
     ],
-    preguntasFrecuentes: [
-      {
-        pregunta: "¿Cuánto tiempo tengo para reclamar después de un accidente?",
-        respuesta:
-          "El plazo general para iniciar un reclamo por daños es de 3 años desde que ocurrió el hecho.",
-      },
-      {
-        pregunta: "¿Qué pasa si el otro conductor no tiene seguro?",
-        respuesta:
-          "Podés reclamar directamente al conductor responsable. También existen fondos de garantía para ciertas situaciones.",
-      },
-    ],
   },
   {
     id: "derecho-familia",
@@ -147,18 +164,18 @@ export const especialidades: Especialidad[] = [
     slug: "derecho-familia",
     icono: Users,
     descripcionCorta:
-      "Divorcios, alimentos, régimen de comunicación, adopciones y más.",
+      "Divorcio, régimen de responsabilidad parental, acciones de filiación y más.",
     descripcionLarga: `
       Acompañamos a las familias en los momentos de cambio y reorganización.
-      Brindamos asesoramiento y representación en divorcios, acuerdos de alimentos,
-      regímenes de comunicación con hijos, y otros temas que afectan las relaciones
-      familiares, siempre priorizando soluciones consensuadas cuando es posible.
+      Brindamos asesoramiento y representación en divorcios, responsabilidad parental,
+      alimentos, acciones de filiación y otros temas que afectan las relaciones
+      familiares, priorizando soluciones que resguarden el interés de todas las partes.
     `,
     problemas: [
       {
         id: "divorcio",
         label: "Quiero divorciarme",
-        descripcion: "Divorcio de común acuerdo o contencioso, convenio regulador",
+        descripcion: "Divorcio unilateral o de común acuerdo, convenio regulador de efectos",
       },
       {
         id: "alimentos-hijos",
@@ -166,9 +183,14 @@ export const especialidades: Especialidad[] = [
         descripcion: "Fijación de alimentos, aumento o reducción de cuota",
       },
       {
-        id: "regimen-comunicacion",
+        id: "filiacion",
+        label: "Mi padre no me reconoce",
+        descripcion: "Acción de filiación, reclamación de estado, impugnación de paternidad",
+      },
+      {
+        id: "responsabilidad-parental",
         label: "Quiero ver a mis hijos / No me dejan verlos",
-        descripcion: "Régimen de visitas, comunicación paterno-filial",
+        descripcion: "Régimen de responsabilidad parental, comunicación, cuidado personal",
       },
       {
         id: "incumplimiento-alimentos",
@@ -176,26 +198,9 @@ export const especialidades: Especialidad[] = [
         descripcion: "Ejecución de cuota alimentaria, reclamo de alimentos adeudados",
       },
       {
-        id: "violencia-familiar",
-        label: "Sufro violencia en mi hogar",
-        descripcion: "Medidas de protección, denuncia, exclusión del hogar",
-      },
-      {
         id: "otro-familia",
         label: "Otro tema relacionado",
         descripcion: "Otras consultas sobre temas de familia",
-      },
-    ],
-    preguntasFrecuentes: [
-      {
-        pregunta: "¿Cuánto tiempo demora un divorcio?",
-        respuesta:
-          "Un divorcio de común acuerdo puede resolverse en pocos meses. Si hay desacuerdos sobre bienes o hijos, el proceso puede extenderse.",
-      },
-      {
-        pregunta: "¿Cómo se calcula la cuota alimentaria?",
-        respuesta:
-          "Se considera el costo de vida del menor, las necesidades específicas, y la capacidad económica de ambos padres.",
       },
     ],
   },
@@ -205,37 +210,38 @@ export const especialidades: Especialidad[] = [
     slug: "derecho-previsional",
     icono: Clock,
     descripcionCorta:
-      "Jubilaciones, pensiones, reajustes y reclamos a ANSES.",
+      "Jubilaciones, pensiones y reajustes ante ANSES y Caja de Jubilaciones de la Provincia de Córdoba.",
     descripcionLarga: `
       Asesoramos y representamos a trabajadores y jubilados en trámites y reclamos
-      previsionales. Gestionamos jubilaciones, pensiones, reajustes de haberes y
-      cualquier conflicto con organismos previsionales como ANSES.
+      previsionales ante ANSES y la Caja de Jubilaciones, Subsidios y Pensiones
+      de la Provincia de Córdoba. Gestionamos jubilaciones, pensiones, reajustes
+      de haberes y recursos ante denegaciones o liquidaciones incorrectas.
     `,
     problemas: [
       {
         id: "jubilacion-tramite",
         label: "Quiero jubilarme",
-        descripcion: "Inicio de trámite jubilatorio, asesoramiento sobre requisitos",
+        descripcion: "Inicio de trámite jubilatorio ante ANSES o Caja Provincial, asesoramiento sobre requisitos",
       },
       {
         id: "jubilacion-rechazada",
         label: "Me rechazaron la jubilación",
-        descripcion: "Recurso administrativo, reclamo judicial",
+        descripcion: "Recurso administrativo y judicial ante denegación de beneficio",
       },
       {
         id: "reajuste-haberes",
         label: "Creo que mi jubilación está mal calculada",
-        descripcion: "Reajuste de haberes, diferencias por mal cálculo",
+        descripcion: "Reajuste de haberes, diferencias por mal cálculo, actualización de prestación",
       },
       {
         id: "pension",
         label: "Necesito una pensión",
-        descripcion: "Pensión por fallecimiento, pensión por discapacidad",
+        descripcion: "Pensión por fallecimiento del titular, pensión por discapacidad",
       },
       {
-        id: "moratoria",
-        label: "No tengo todos los aportes",
-        descripcion: "Moratorias previsionales, regularización de aportes",
+        id: "caja-provincial",
+        label: "Soy empleado o jubilado provincial",
+        descripcion: "Trámites y reclamos ante la Caja de Jubilaciones de la Provincia de Córdoba",
       },
       {
         id: "otro-previsional",
@@ -243,30 +249,19 @@ export const especialidades: Especialidad[] = [
         descripcion: "Otras consultas previsionales",
       },
     ],
-    preguntasFrecuentes: [
-      {
-        pregunta: "¿Cuántos años de aportes necesito para jubilarme?",
-        respuesta:
-          "Generalmente se requieren 30 años de aportes y la edad jubilatoria (60 años mujeres, 65 años hombres en el régimen general).",
-      },
-      {
-        pregunta: "¿Puedo jubilarme si no tengo todos los aportes?",
-        respuesta:
-          "Existen moratorias y planes de regularización que permiten completar los años de aportes faltantes.",
-      },
-    ],
   },
   {
     id: "derecho-laboral",
-    nombre: "Derecho Laboral",
+    nombre: "Derecho Laboral y A.R.T.",
     slug: "derecho-laboral",
     icono: Briefcase,
     descripcionCorta:
-      "Despidos, accidentes de trabajo, reclamos laborales y más.",
+      "Despidos, accidentes de trabajo, reclamos laborales y reclamos ante A.R.T.",
     descripcionLarga: `
       Defendemos los derechos de los trabajadores frente a situaciones de conflicto
-      laboral. Asesoramos en casos de despido, accidentes de trabajo, reclamos salariales
-      y cualquier vulneración de derechos en el ámbito laboral.
+      laboral. Asesoramos en casos de despido, reclamos salariales, accidentes de trabajo
+      y enfermedades profesionales, incluyendo reclamos ante Aseguradoras de Riesgos
+      del Trabajo (A.R.T.) por incapacidades laborales.
     `,
     problemas: [
       {
@@ -282,7 +277,12 @@ export const especialidades: Especialidad[] = [
       {
         id: "accidente-trabajo",
         label: "Tuve un accidente en el trabajo",
-        descripcion: "Reclamo a ART, incapacidad laboral, enfermedades profesionales",
+        descripcion: "Reclamo a A.R.T., incapacidad laboral, enfermedades profesionales",
+      },
+      {
+        id: "art-no-cubre",
+        label: "La A.R.T. no me cubre o me rechazó",
+        descripcion: "Impugnación de rechazo, reclamo judicial por incapacidad, diferencias de prestaciones",
       },
       {
         id: "salarios-adeudados",
@@ -290,26 +290,9 @@ export const especialidades: Especialidad[] = [
         descripcion: "Reclamo de salarios, horas extra, aguinaldo",
       },
       {
-        id: "acoso-laboral",
-        label: "Sufro acoso o maltrato laboral",
-        descripcion: "Mobbing, acoso laboral, ambiente de trabajo hostil",
-      },
-      {
         id: "otro-laboral",
         label: "Otro tema relacionado",
         descripcion: "Otras consultas laborales",
-      },
-    ],
-    preguntasFrecuentes: [
-      {
-        pregunta: "¿Cuánto tiempo tengo para reclamar después de un despido?",
-        respuesta:
-          "El plazo para reclamar diferencias salariales e indemnizaciones es de 2 años desde que se generó el derecho.",
-      },
-      {
-        pregunta: "¿Me pueden despedir sin causa?",
-        respuesta:
-          "El empleador puede despedir sin causa, pero debe pagar la indemnización correspondiente según la ley.",
       },
     ],
   },

@@ -22,7 +22,7 @@ export const consultaSchema = z.object({
     .min(8, "El teléfono debe tener al menos 8 dígitos")
     .max(20, "El teléfono no puede superar los 20 caracteres")
     .regex(/^[\d\s\-+()]+$/, "El teléfono solo puede contener números, espacios, guiones y paréntesis"),
-  localidad: z.string().max(100).optional(),
+  localidad: z.string().min(1, "Ingresá tu localidad").max(100),
   aceptaTerminos: z.boolean().refine((val) => val === true, {
     message: "Debés aceptar los términos y condiciones",
   }),
@@ -44,12 +44,14 @@ export const turnoSchema = z.object({
   }),
   fechaPreferida: z
     .string()
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "El formato debe ser dd/mm/yyyy")
     .refine((val) => {
-      const fecha = new Date(val);
+      const [dia, mes, anio] = val.split("/").map(Number);
+      const fecha = new Date(anio, mes - 1, dia);
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
-      return fecha >= hoy;
-    }, "La fecha debe ser hoy o posterior"),
+      return fecha > hoy;
+    }, "La fecha debe ser posterior a hoy"),
   horarioPreferido: z.enum(["manana", "tarde"], {
     message: "Seleccioná un horario preferido",
   }),
@@ -62,26 +64,25 @@ export type TurnoInput = z.infer<typeof turnoSchema>;
 // ============================================
 
 export const consultaConTurnoSchema = consultaSchema.extend({
-  solicitaTurno: z.boolean(),
-  turno: z
-    .object({
-      modalidad: z.enum(["PRESENCIAL", "VIRTUAL"]).optional(),
-      fechaPreferida: z.string().optional(),
-      horarioPreferido: z.enum(["manana", "tarde"]).optional(),
-    })
-    .optional(),
-}).refine(
-  (data) => {
-    if (data.solicitaTurno) {
-      return data.turno?.modalidad && data.turno?.fechaPreferida && data.turno?.horarioPreferido;
-    }
-    return true;
-  },
-  {
-    message: "Completá los datos del turno",
-    path: ["turno"],
-  }
-);
+  turno: z.object({
+    modalidad: z.enum(["PRESENCIAL", "VIRTUAL"], {
+      message: "Seleccioná una modalidad",
+    }),
+    fechaPreferida: z
+      .string()
+      .regex(/^\d{2}\/\d{2}\/\d{4}$/, "El formato debe ser dd/mm/yyyy")
+      .refine((val) => {
+        const [dia, mes, anio] = val.split("/").map(Number);
+        const fecha = new Date(anio, mes - 1, dia);
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        return fecha > hoy;
+      }, "La fecha debe ser posterior a hoy"),
+    horarioPreferido: z.enum(["manana", "tarde"], {
+      message: "Seleccioná un horario preferido",
+    }),
+  }),
+});
 
 export type ConsultaConTurnoInput = z.infer<typeof consultaConTurnoSchema>;
 

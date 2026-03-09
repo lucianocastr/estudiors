@@ -65,7 +65,7 @@ export default function ContactoPage() {
 
             {/* WhatsApp */}
             <a
-              href="https://wa.me/5493513100760"
+              href="https://wa.me/5493518916246"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-4 p-5 rounded-xl border border-border/60 bg-card hover:border-primary/30 hover:shadow-md transition-all duration-200"

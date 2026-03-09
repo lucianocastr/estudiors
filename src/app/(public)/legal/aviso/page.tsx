@@ -89,6 +89,10 @@ export default function AvisoLegalPage() {
               pasos a seguir.
             </p>
 
+            <p className="text-sm text-muted-foreground mt-8">
+              Última actualización: Marzo 2026
+            </p>
+
             <div className="bg-secondary/40 p-6 rounded-xl mt-8 border border-border/50">
               <p className="text-sm text-muted-foreground mb-0">
                 <strong>Recordá:</strong> La información de este sitio es orientativa.
