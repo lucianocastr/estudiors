@@ -50,6 +50,7 @@ export function ConsultaForm() {
   const [paso, setPaso] = useState(1);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const form = useForm<ConsultaConTurnoInput>({
     resolver: zodResolver(consultaConTurnoSchema),
@@ -438,12 +439,12 @@ export function ConsultaForm() {
                         return (
                           <FormItem>
                             <FormLabel>Fecha preferida</FormLabel>
-                            <Popover>
+                            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button
                                     variant="outline"
-                                    className="w-full justify-start text-left font-normal"
+                                    className="w-full justify-start text-left font-normal hover:bg-secondary hover:text-foreground"
                                   >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {field.value || <span className="text-muted-foreground">Seleccioná una fecha</span>}
@@ -460,6 +461,7 @@ export function ConsultaForm() {
                                       const mm = String(date.getMonth() + 1).padStart(2, "0");
                                       const yyyy = date.getFullYear();
                                       field.onChange(`${dd}/${mm}/${yyyy}`);
+                                      setCalendarOpen(false);
                                     }
                                   }}
                                   disabled={(date) => date <= new Date()}
@@ -641,6 +643,7 @@ export function ConsultaForm() {
               variant="outline"
               onClick={retroceder}
               disabled={paso === 1 || enviando}
+              className="hover:bg-secondary hover:text-foreground"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Anterior
