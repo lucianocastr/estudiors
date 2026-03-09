@@ -39,7 +39,7 @@ export default function EspecialidadesPage() {
               return (
                 <Card
                   key={esp.id}
-                  className="hover:shadow-md transition-all duration-200 border-border/60 bg-card hover:border-accent/30"
+                  className="flex flex-col hover:shadow-md transition-all duration-200 border-border/60 bg-card hover:border-accent/30"
                 >
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4">
@@ -56,11 +56,11 @@ export default function EspecialidadesPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="flex flex-col flex-1">
                     <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wide">
                       Situaciones frecuentes
                     </p>
-                    <ul className="text-sm text-muted-foreground space-y-1.5 mb-5">
+                    <ul className="text-sm text-muted-foreground space-y-1.5 mb-5 flex-1">
                       {esp.problemas.slice(0, 3).map((prob) => (
                         <li key={prob.id} className="flex items-center gap-2.5">
                           <span className="w-1 h-1 bg-accent rounded-full flex-shrink-0" />
@@ -71,7 +71,7 @@ export default function EspecialidadesPage() {
                     <Button
                       asChild
                       variant="outline"
-                      className="w-full text-sm border-border/60 hover:bg-background hover:border-primary/40 hover:text-primary"
+                      className="w-full text-sm border-border/60 hover:bg-background hover:border-primary/40 hover:text-primary mt-auto"
                     >
                       <Link href={`/especialidades/${esp.slug}`}>
                         Ver más información
