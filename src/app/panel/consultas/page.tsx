@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageSquare, Calendar, Phone, Mail } from "lucide-react";
+import { DeleteConsultaButton } from "@/components/panel/delete-consulta-button";
 
 async function getOrganizacionId(usuarioId: string): Promise<string | null> {
   const membresia = await prisma.organizacionMiembro.findFirst({
@@ -126,11 +127,14 @@ export default async function ConsultasPage() {
                       minute: "2-digit",
                     })}
                   </div>
-                  <Button asChild size="sm">
-                    <Link href={`/panel/consultas/${consulta.id}`}>
-                      Ver detalles
-                    </Link>
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <DeleteConsultaButton consultaId={consulta.id} iconOnly />
+                    <Button asChild size="sm">
+                      <Link href={`/panel/consultas/${consulta.id}`}>
+                        Ver detalles
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

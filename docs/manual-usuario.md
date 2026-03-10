@@ -1,7 +1,7 @@
 # Manual de Usuario — Sistema de Gestión RBS Estudio Jurídico
 
-**Versión:** 2.0
-**Fecha:** Febrero 2026
+**Versión:** 2.1
+**Fecha:** Marzo 2026
 **Estudio:** Romina Belén Sanchez — Abogada · Alta Gracia, Córdoba
 
 ---
@@ -140,7 +140,9 @@ Si existen alertas pendientes de casos CRP, aparece un panel naranja con hasta 5
 
 ### Últimas Consultas
 
-Lista las 5 consultas más recientes. Muestra nombre del contacto, descripción resumida, fecha y estado actual. El botón **"Ver"** lleva al detalle de esa consulta.
+Lista las 5 consultas más recientes. Muestra nombre del contacto, descripción resumida, fecha y estado actual. Cada fila tiene:
+- Botón **"Ver"** — lleva al detalle de la consulta
+- Botón **papelera** — elimina la consulta (solicita confirmación antes de proceder)
 
 ---
 
@@ -160,6 +162,7 @@ Cada card de consulta muestra:
 - Indicador si tiene turno solicitado
 - Fecha y hora de recepción
 - Estado actual (badge de color)
+- Botón **papelera** — elimina la consulta (pide confirmación)
 - Botón **"Ver detalles"**
 
 ### 4.2 Detalle de consulta
@@ -201,15 +204,19 @@ El cambio queda registrado automáticamente en la línea de tiempo de eventos.
 Si la consulta tiene un turno asociado, aparece un card con los detalles del mismo (modalidad, fecha preferida, horario).
 
 **Confirmar turno:**
-1. Ingresar la fecha y hora exacta confirmada en el campo `datetime-local`
-2. Si es virtual, opcionalmente ingresar el link de videollamada
-3. Clic en **"Confirmar turno"**
+1. Clic en el selector de fecha — se abre un calendario con formato `dd/mm/aaaa`
+2. Seleccionar el día del turno
+3. Ingresar el horario exacto en el campo de hora
+4. Si es virtual, opcionalmente ingresar el link de videollamada
+5. Clic en **"Confirmar turno"**
 
-El sistema envía automáticamente un email de confirmación al cliente con los datos del turno.
+El sistema envía automáticamente un **email de confirmación al cliente** con la fecha, hora, modalidad y (si aplica) el link de videollamada.
 
 **Rechazar turno:**
 1. Opcionalmente ingresar el motivo del rechazo
 2. Clic en **"Rechazar"**
+
+El sistema envía automáticamente un **email informativo al cliente** indicando que el turno no pudo confirmarse, el motivo (si se completó) y los datos de contacto del estudio para coordinar un nuevo horario.
 
 ### 4.5 Notas internas
 
@@ -551,10 +558,11 @@ Detalle del caso:
 ```
 /panel/turnos → identificar turnos en estado "Pendiente"
     → Clic en "Ver consulta" para ir al detalle
-    → Card de turno: ingresar fecha/hora confirmada
-    → Clic "Confirmar turno" → email automático al cliente
-    O bien:
-    → Ingresar motivo → Clic "Rechazar"
+    → Card de turno:
+        CONFIRMAR: seleccionar fecha en el calendario (dd/mm/aaaa) + horario
+                   → Clic "Confirmar turno" → email automático al cliente
+        RECHAZAR:  ingresar motivo (opcional)
+                   → Clic "Rechazar" → email informativo automático al cliente
 ```
 
 ---
@@ -568,7 +576,7 @@ Contactar al administrador del sistema para que registre la cuenta.
 No. El panel es exclusivo para el equipo del estudio. Los clientes solo ven el sitio público.
 
 **¿Se pueden eliminar consultas?**
-El sistema usa eliminación lógica (los registros se marcan como eliminados pero no se borran de la base de datos), lo que preserva el historial.
+Sí. Cada consulta tiene un botón con ícono de papelera, disponible en el dashboard, el listado de consultas y en la vista de detalle. Al presionarlo aparece un diálogo de confirmación antes de proceder. La eliminación es **lógica** (el registro se marca como eliminado pero no se borra físicamente de la base de datos), lo que preserva la integridad del historial.
 
 **¿Cómo sé cuánto cobrar en un caso CRP?**
 En el tab **Honorarios** del caso hay una tabla de referencia arancelaria basada en la Ley 9459 (Córdoba). Todos los valores están expresados en **Jus**. Para convertir a ARS, multiplicá por el valor del Jus vigente del mes, publicado en el sitio del TSJ Córdoba.
@@ -583,7 +591,14 @@ Si la fecha de prescripción está a menos de 90 días, el sistema genera autom�
 No. Las notas internas son confidenciales y solo visibles para el equipo del estudio dentro del panel.
 
 **¿Cómo funciona el email automático?**
-El sistema usa una cola de emails (`EmailCola`). Los emails se encolan al momento del evento (nueva consulta, confirmación de turno, etc.) y se procesan automáticamente en segundo plano, de manera que no bloqueen la experiencia del usuario.
+El sistema usa una cola de emails (`EmailCola`). Los emails se encolan al momento del evento y se procesan automáticamente en segundo plano:
+
+| Evento | Destinatario | Template |
+|--------|-------------|----------|
+| Nueva consulta recibida | Estudio (admin) | `nueva-consulta-admin` |
+| Consulta enviada por el cliente | Cliente | `confirmacion-cliente` |
+| Turno confirmado | Cliente | `turno-confirmado` |
+| Turno rechazado | Cliente | `turno-rechazado` |
 
 ---
 

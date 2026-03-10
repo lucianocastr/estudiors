@@ -18,6 +18,8 @@ import {
   User,
 } from "lucide-react";
 import { cambiarEstado, agregarNota, confirmarTurno, rechazarTurno } from "./actions";
+import { ConfirmarTurnoForm } from "@/components/panel/confirmar-turno-form";
+import { DeleteConsultaButton } from "@/components/panel/delete-consulta-button";
 
 // ── Helpers de presentación ───────────────────────────────────────────────────
 
@@ -143,11 +145,14 @@ export default async function ConsultaDetallePage({
             {consulta.especialidad} · {consulta.tipoProblema}
           </p>
         </div>
-        <span
-          className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${ESTADO_COLORS[consulta.estado]}`}
-        >
-          {ESTADO_LABELS[consulta.estado]}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${ESTADO_COLORS[consulta.estado]}`}
+          >
+            {ESTADO_LABELS[consulta.estado]}
+          </span>
+          <DeleteConsultaButton consultaId={consulta.id} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -268,38 +273,11 @@ export default async function ConsultaDetallePage({
                 )}
 
                 {consulta.turno.estado === "PENDIENTE" && (
-                  <div className="flex gap-3 pt-2 border-t">
-                    <form action={confirmarTurnoAction} className="flex-1 space-y-2">
-                      <input
-                        type="datetime-local"
-                        name="fechaConfirmada"
-                        required
-                        className="w-full text-sm border rounded-md px-3 py-1.5 bg-background"
-                      />
-                      {consulta.turno.modalidad === "VIRTUAL" && (
-                        <input
-                          type="url"
-                          name="linkVideoCall"
-                          placeholder="Link de videollamada (opcional)"
-                          className="w-full text-sm border rounded-md px-3 py-1.5 bg-background"
-                        />
-                      )}
-                      <Button type="submit" size="sm" className="w-full">
-                        Confirmar turno
-                      </Button>
-                    </form>
-                    <form action={rechazarTurnoAction}>
-                      <input
-                        type="text"
-                        name="motivoRechazo"
-                        placeholder="Motivo (opcional)"
-                        className="w-full text-sm border rounded-md px-3 py-1.5 mb-2 bg-background"
-                      />
-                      <Button type="submit" variant="destructive" size="sm" className="w-full">
-                        Rechazar
-                      </Button>
-                    </form>
-                  </div>
+                  <ConfirmarTurnoForm
+                    confirmarAction={confirmarTurnoAction}
+                    rechazarAction={rechazarTurnoAction}
+                    esVirtual={consulta.turno.modalidad === "VIRTUAL"}
+                  />
                 )}
               </CardContent>
             </Card>

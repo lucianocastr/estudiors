@@ -4,9 +4,11 @@ import {
   enviarEmailNuevaConsulta,
   enviarEmailConfirmacion,
   enviarEmailTurnoConfirmado,
+  enviarEmailTurnoRechazado,
   type PayloadNuevaConsultaAdmin,
   type PayloadConfirmacionCliente,
   type PayloadTurnoConfirmado,
+  type PayloadTurnoRechazado,
 } from "@/lib/email";
 
 // Protección simple con token de cron — configurable en .env
@@ -105,6 +107,9 @@ async function despacharEmail(
       break;
     case "turno-confirmado":
       await enviarEmailTurnoConfirmado(payload as PayloadTurnoConfirmado);
+      break;
+    case "turno-rechazado":
+      await enviarEmailTurnoRechazado(payload as PayloadTurnoRechazado);
       break;
     default:
       throw new Error(`Template desconocido: ${template}`);

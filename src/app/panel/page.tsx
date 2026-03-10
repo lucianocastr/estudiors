@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Briefcase,
 } from "lucide-react";
+import { DeleteConsultaButton } from "@/components/panel/delete-consulta-button";
 
 async function getOrganizacionId(usuarioId: string): Promise<string | null> {
   const membresia = await prisma.organizacionMiembro.findFirst({
@@ -269,6 +270,7 @@ export default async function PanelDashboard() {
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${CONSULTA_ESTADO_COLORS[consulta.estado] ?? "bg-gray-100 text-gray-600"}`}>
                       {CONSULTA_ESTADO_LABELS[consulta.estado] ?? consulta.estado}
                     </span>
+                    <DeleteConsultaButton consultaId={consulta.id} iconOnly />
                     <Button asChild variant="ghost" size="sm">
                       <Link href={`/panel/consultas/${consulta.id}`}>
                         Ver

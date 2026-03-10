@@ -4,7 +4,7 @@ import { especialidades } from "@/content/especialidades";
 // Configurar transporter de Nodemailer
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
+  port: Number.parseInt(process.env.SMTP_PORT || "587"),
   secure: false,
   auth: {
     user: process.env.SMTP_USER,
@@ -40,6 +40,7 @@ export type PayloadTurnoConfirmado = {
   email: string;
   modalidad: string;
   fechaConfirmada: string; // ISO string
+  linkVideoCall?: string | null;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -227,6 +228,8 @@ export async function enviarEmailTurnoConfirmado(
 
       ${payload.modalidad === "PRESENCIAL" ? `
         <p><strong>Dirección:</strong> ${process.env.ESTUDIO_DIRECCION || "Córdoba, Argentina"}</p>
+      ` : payload.linkVideoCall ? `
+        <p><strong>Enlace de videollamada:</strong> <a href="${payload.linkVideoCall}">${payload.linkVideoCall}</a></p>
       ` : `
         <p>Te enviaremos el enlace de la videollamada antes de la cita.</p>
       `}
@@ -242,6 +245,71 @@ export async function enviarEmailTurnoConfirmado(
     from: process.env.SMTP_FROM,
     to: payload.email,
     subject: `Turno confirmado — ${nombreEstudio}`,
+    html,
+  });
+}
+
+// ── Template: turno-rechazado ─────────────────────────────────────────────────
+
+export type PayloadTurnoRechazado = {
+  consultaId: string;
+  nombre: string;
+  email: string;
+  motivoRechazo?: string | null;
+};
+
+export async function enviarEmailTurnoRechazado(
+  payload: PayloadTurnoRechazado
+): Promise<void> {
+  const nombreEstudio = process.env.ESTUDIO_NOMBRE || "Estudio Jurídico RS";
+  const primerNombre = payload.nombre.split(" ")[0];
+
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333;">Turno no disponible</h2>
+
+      <p>Hola ${primerNombre},</p>
+
+      <p>
+        Lamentamos informarte que no fue posible confirmar el turno que solicitaste en
+        <strong>${nombreEstudio}</strong>.
+      </p>
+
+      ${payload.motivoRechazo ? `
+      <div style="background: #fef9ec; padding: 15px; border-radius: 5px; border-left: 4px solid #f59e0b; margin: 20px 0;">
+        <p style="margin: 0;"><strong>Motivo:</strong> ${payload.motivoRechazo}</p>
+      </div>
+      ` : ""}
+
+      <p>
+        Por favor no dudes en contactarnos para coordinar un nuevo horario que se adapte
+        a tus necesidades.
+      </p>
+
+      <div style="background: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
+        <p style="margin: 0 0 8px 0;"><strong>Contacto:</strong></p>
+        <p style="margin: 0;">
+          📧 <a href="mailto:${process.env.ESTUDIO_EMAIL}">${process.env.ESTUDIO_EMAIL}</a><br>
+          📞 <a href="tel:${process.env.ESTUDIO_TELEFONO}">${process.env.ESTUDIO_TELEFONO}</a>
+        </p>
+      </div>
+
+      <p>Saludos cordiales,</p>
+      <p><strong>${nombreEstudio}</strong></p>
+
+      <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+      <p style="color: #999; font-size: 12px;">
+        <strong>Aviso legal:</strong> Este email es de carácter informativo.
+        La información proporcionada no constituye asesoramiento legal.
+      </p>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM,
+    to: payload.email,
+    subject: `Información sobre tu turno — ${nombreEstudio}`,
     html,
   });
 }

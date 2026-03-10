@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { InquiryEstado, NotaTipo } from "@prisma/client";
@@ -97,6 +98,12 @@ export async function confirmarTurno(consultaId: string, formData: FormData) {
 
   const { session, organizacionId } = await getConsultaSegura(consultaId);
 
+  // Obtener contacto y turno para el email
+  const consultaCompleta = await prisma.consulta.findFirst({
+    where: { id: consultaId, organizacionId },
+    include: { contacto: true, turno: true },
+  });
+
   await prisma.turno.update({
     where: { consultaId },
     data: {
@@ -116,6 +123,27 @@ export async function confirmarTurno(consultaId: string, formData: FormData) {
     },
   });
 
+  // Encolar email de confirmación al cliente
+  if (consultaCompleta?.contacto && consultaCompleta.turno) {
+    await prisma.emailCola.create({
+      data: {
+        organizacionId,
+        destinatario: consultaCompleta.contacto.email,
+        asunto: `Turno confirmado — ${process.env.ESTUDIO_NOMBRE || "Estudio Jurídico RS"}`,
+        template: "turno-confirmado",
+        payload: {
+          consultaId,
+          nombre: consultaCompleta.contacto.nombre,
+          email: consultaCompleta.contacto.email,
+          modalidad: consultaCompleta.turno.modalidad,
+          fechaConfirmada: fechaStr,
+          linkVideoCall: linkVideoCall,
+        },
+        prioridad: 2,
+      },
+    });
+  }
+
   revalidatePath(`/panel/consultas/${consultaId}`);
 }
 
@@ -123,6 +151,12 @@ export async function rechazarTurno(consultaId: string, formData: FormData) {
   const motivo = (formData.get("motivoRechazo") as string) || null;
 
   const { session, organizacionId } = await getConsultaSegura(consultaId);
+
+  // Obtener contacto para el email
+  const consultaCompleta = await prisma.consulta.findFirst({
+    where: { id: consultaId, organizacionId },
+    include: { contacto: true },
+  });
 
   await prisma.turno.update({
     where: { consultaId },
@@ -138,5 +172,37 @@ export async function rechazarTurno(consultaId: string, formData: FormData) {
     },
   });
 
+  // Encolar email de rechazo al cliente
+  if (consultaCompleta?.contacto) {
+    await prisma.emailCola.create({
+      data: {
+        organizacionId,
+        destinatario: consultaCompleta.contacto.email,
+        asunto: `Información sobre tu turno — ${process.env.ESTUDIO_NOMBRE || "Estudio Jurídico RS"}`,
+        template: "turno-rechazado",
+        payload: {
+          consultaId,
+          nombre: consultaCompleta.contacto.nombre,
+          email: consultaCompleta.contacto.email,
+          motivoRechazo: motivo,
+        },
+        prioridad: 2,
+      },
+    });
+  }
+
   revalidatePath(`/panel/consultas/${consultaId}`);
+}
+
+export async function eliminarConsulta(consultaId: string) {
+  await getConsultaSegura(consultaId);
+
+  await prisma.consulta.update({
+    where: { id: consultaId },
+    data: { deletedAt: new Date() },
+  });
+
+  revalidatePath("/panel/consultas");
+  revalidatePath("/panel");
+  redirect("/panel/consultas");
 }
