@@ -14,7 +14,7 @@ async function getOrganizacionId(usuarioId: string): Promise<string | null> {
 
 async function getTurnos(organizacionId: string) {
   return prisma.turno.findMany({
-    where: { organizacionId, deletedAt: null },
+    where: { organizacionId, deletedAt: null, consulta: { deletedAt: null } },
     orderBy: [{ estado: "asc" }, { fechaPreferida: "asc" }],
     include: {
       consulta: {

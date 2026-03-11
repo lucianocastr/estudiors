@@ -1,6 +1,6 @@
 # Manual de Usuario — Sistema de Gestión RBS Estudio Jurídico
 
-**Versión:** 2.1
+**Versión:** 2.2
 **Fecha:** Marzo 2026
 **Estudio:** Romina Belén Sanchez — Abogada · Alta Gracia, Córdoba
 
@@ -242,7 +242,7 @@ Cada nota registra quién la escribió y cuándo.
 
 **Ruta:** `/panel/turnos`
 
-Lista todos los turnos de la organización, ordenados por estado y fecha preferida.
+Lista todos los turnos de la organización, ordenados por estado y fecha preferida. Solo se muestran turnos de consultas activas — los turnos de consultas eliminadas no aparecen en este listado.
 
 Cada card muestra:
 - Nombre del cliente
