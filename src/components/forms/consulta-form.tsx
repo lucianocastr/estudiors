@@ -91,7 +91,7 @@ export function ConsultaForm() {
         camposValidar = ["descripcion"];
         break;
       case 3:
-        camposValidar = ["nombre", "email", "telefono"];
+        camposValidar = ["nombre", "email", "telefono", "localidad"];
         break;
       case 4:
         camposValidar = ["turno"] as (keyof ConsultaConTurnoInput)[];
