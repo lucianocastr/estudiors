@@ -115,7 +115,7 @@ export async function enviarEmailNuevaConsulta(
       <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${payload.descripcion}</div>
 
       <p style="color: #666; font-size: 12px; margin-top: 30px;">
-        Consulta recibida el ${new Date(payload.createdAt).toLocaleString("es-AR")}
+        Consulta recibida el ${new Date(payload.createdAt).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}
         <br>
         ID: ${payload.consultaId}
       </p>
@@ -200,16 +200,17 @@ function buildGoogleCalendarUrl(
   descripcion: string,
   ubicacion: string
 ): string {
+  // Google Calendar espera fechas en UTC con sufijo Z
   const pad = (n: number) => String(n).padStart(2, "0");
-  const fmt = (d: Date) =>
-    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+  const fmtUtc = (d: Date) =>
+    `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
 
   const fin = new Date(inicio.getTime() + duracionMinutos * 60 * 1000);
 
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: titulo,
-    dates: `${fmt(inicio)}/${fmt(fin)}`,
+    dates: `${fmtUtc(inicio)}/${fmtUtc(fin)}`,
     details: descripcion,
     location: ubicacion,
   });
@@ -226,7 +227,10 @@ export async function enviarEmailTurnoConfirmado(
   const primerNombre = payload.nombre.split(" ")[0];
   const fecha = new Date(payload.fechaConfirmada);
 
+  const tz = "America/Argentina/Buenos_Aires";
+
   const fechaFormateada = fecha.toLocaleDateString("es-AR", {
+    timeZone: tz,
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -234,6 +238,7 @@ export async function enviarEmailTurnoConfirmado(
   });
 
   const horaFormateada = fecha.toLocaleTimeString("es-AR", {
+    timeZone: tz,
     hour: "2-digit",
     minute: "2-digit",
   });
