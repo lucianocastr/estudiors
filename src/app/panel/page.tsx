@@ -263,7 +263,7 @@ export default async function PanelDashboard() {
                       {consulta.descripcion?.substring(0, 100) ?? ""}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(consulta.createdAt).toLocaleDateString("es-AR")}
+                      {new Date(consulta.createdAt).toLocaleDateString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 ml-4 flex-shrink-0">

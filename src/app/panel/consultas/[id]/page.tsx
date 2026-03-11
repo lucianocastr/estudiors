@@ -182,6 +182,7 @@ export default async function ConsultaDetallePage({
                   <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Recibida</p>
                   <p className="font-medium">
                     {new Date(consulta.createdAt).toLocaleDateString("es-AR", {
+                      timeZone: "America/Argentina/Buenos_Aires",
                       day: "numeric",
                       month: "short",
                       year: "numeric",
