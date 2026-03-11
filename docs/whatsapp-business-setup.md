@@ -54,7 +54,7 @@ Hola 👋 Soy Romina Sanchez, abogada.
 Gracias por escribirme. En breve te respondo personalmente.
 
 Mientras tanto, si querés hacer una consulta formal podés completar el formulario en:
-👉 [URL del sitio]/consulta
+👉 https://www.rsestudiojuridico.com.ar/consulta
 
 Funciona las 24hs y la consulta inicial es sin cargo.
 ```
@@ -78,7 +78,7 @@ Te respondo el próximo día hábil en horario de 9 a 18hs.
 Si tu consulta es urgente, podés dejar tu mensaje y te contacto a la brevedad.
 
 También podés iniciar tu consulta en cualquier momento desde:
-👉 [URL del sitio]/consulta
+👉 https://www.rsestudiojuridico.com.ar/consulta
 ```
 
 ---
@@ -97,7 +97,7 @@ Crear las siguientes:
 **Atajo:** `turno`
 ```
 Para coordinar un turno, completá el formulario en:
-👉 [URL del sitio]/consulta
+👉 https://www.rsestudiojuridico.com.ar/consulta
 
 Podés elegir modalidad presencial (Alta Gracia) o virtual (videollamada).
 La consulta inicial es sin cargo.
@@ -121,7 +121,7 @@ Te los informo con precisión una vez que revisemos tu situación en una primera
 Sí, atiendo de forma virtual por videollamada para toda la provincia de Córdoba.
 
 Podés solicitar turno virtual en:
-👉 [URL del sitio]/consulta
+👉 https://www.rsestudiojuridico.com.ar/consulta
 ```
 
 ---
@@ -132,7 +132,7 @@ Podés solicitar turno virtual en:
 El estudio está en Alta Gracia, Córdoba.
 
 Podés solicitar turno presencial en:
-👉 [URL del sitio]/consulta
+👉 https://www.rsestudiojuridico.com.ar/consulta
 ```
 
 ---
@@ -149,7 +149,7 @@ Podés solicitar turno presencial en:
 • Derecho Real y Sucesiones
 
 Consulta inicial sin cargo.
-👉 [URL del sitio]
+👉 https://www.rsestudiojuridico.com.ar
 ```
 
 ---
@@ -168,7 +168,7 @@ Perfecto, quedo a disposición. Cualquier duda adicional no dudes en escribirme 
 Aclaración importante: la información que puedo brindar por este medio es de carácter general y no constituye asesoramiento legal formal.
 
 Para un análisis personalizado de tu situación te recomiendo coordinar una consulta.
-👉 [URL del sitio]/consulta
+👉 https://www.rsestudiojuridico.com.ar/consulta
 ```
 
 ---
@@ -232,7 +232,7 @@ Caso cerrado
 
 ## Notas importantes
 
-- **Reemplazar `[URL del sitio]`** con la URL real del sitio en todos los textos antes de activar.
+- **Reemplazar `https://www.rsestudiojuridico.com.ar`** con la URL real del sitio en todos los textos antes de activar.
 - **Foto de perfil:** usar una foto profesional o el logo RS del estudio.
 - **El número de WhatsApp Business** es el mismo que aparece en el sitio (`+54 9 351 310-0760`). Una vez migrado, los contactos existentes no notan la diferencia.
 - **Estadísticas:** WhatsApp Business tiene métricas básicas de mensajes enviados/recibidos/leídos en ⚙️ → Herramientas → Estadísticas.

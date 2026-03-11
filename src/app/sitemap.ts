@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { especialidades } from "@/content/especialidades";
 
-const BASE_URL = "https://rsestudiojuridico.com.ar";
+const BASE_URL = "https://www.rsestudiojuridico.com.ar";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const especialidadesPaths = especialidades.map((e) => ({

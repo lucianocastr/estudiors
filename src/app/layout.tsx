@@ -17,6 +17,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.rsestudiojuridico.com.ar"),
   title: {
     default: "Estudio Jurídico Romina Belén Sanchez | Alta Gracia, Córdoba",
     template: "%s | Estudio Jurídico RBS",
@@ -37,10 +38,14 @@ export const metadata: Metadata = {
     "Romina Sanchez abogada",
   ],
   authors: [{ name: "Estudio Jurídico Romina Belén Sanchez" }],
+  alternates: {
+    canonical: "https://www.rsestudiojuridico.com.ar",
+  },
   openGraph: {
     type: "website",
     locale: "es_AR",
     siteName: "Estudio Jurídico RBS",
+    url: "https://www.rsestudiojuridico.com.ar",
   },
   robots: {
     index: true,
