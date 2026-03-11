@@ -191,6 +191,32 @@ export async function enviarEmailConfirmacion(
   });
 }
 
+// ── Helper: Google Calendar URL ───────────────────────────────────────────────
+
+function buildGoogleCalendarUrl(
+  titulo: string,
+  inicio: Date,
+  duracionMinutos: number,
+  descripcion: string,
+  ubicacion: string
+): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const fmt = (d: Date) =>
+    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+
+  const fin = new Date(inicio.getTime() + duracionMinutos * 60 * 1000);
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: titulo,
+    dates: `${fmt(inicio)}/${fmt(fin)}`,
+    details: descripcion,
+    location: ubicacion,
+  });
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 // ── Template: turno-confirmado ────────────────────────────────────────────────
 
 export async function enviarEmailTurnoConfirmado(
@@ -211,6 +237,25 @@ export async function enviarEmailTurnoConfirmado(
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const ubicacion =
+    payload.modalidad === "PRESENCIAL"
+      ? process.env.ESTUDIO_DIRECCION || "Córdoba, Argentina"
+      : payload.linkVideoCall || "Videollamada";
+
+  const linkSufijo = payload.linkVideoCall ? `\nEnlace: ${payload.linkVideoCall}` : "";
+  const descripcionEvento =
+    payload.modalidad === "PRESENCIAL"
+      ? `Consulta jurídica presencial — ${nombreEstudio}`
+      : `Consulta jurídica virtual — ${nombreEstudio}${linkSufijo}`;
+
+  const googleCalendarUrl = buildGoogleCalendarUrl(
+    `Consulta jurídica — ${nombreEstudio}`,
+    fecha,
+    60,
+    descripcionEvento,
+    ubicacion
+  );
 
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -233,6 +278,14 @@ export async function enviarEmailTurnoConfirmado(
       ` : `
         <p>Te enviaremos el enlace de la videollamada antes de la cita.</p>
       `}
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${googleCalendarUrl}"
+           target="_blank"
+           style="display: inline-block; background-color: #4285F4; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 600;">
+          📅 Agregar al calendario
+        </a>
+      </div>
 
       <p>Si necesitás reprogramar o cancelar, por favor contactanos con anticipación.</p>
 
