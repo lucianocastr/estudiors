@@ -50,7 +50,7 @@ export const turnoSchema = z.object({
       const fecha = new Date(anio, mes - 1, dia);
       const hoy = new Date();
       hoy.setHours(0, 0, 0, 0);
-      return fecha > hoy;
+      return fecha >= hoy;
     }, "La fecha debe ser posterior a hoy"),
   horarioPreferido: z.enum(["manana", "tarde"], {
     message: "Seleccioná un horario preferido",
@@ -76,7 +76,7 @@ export const consultaConTurnoSchema = consultaSchema.extend({
         const fecha = new Date(anio, mes - 1, dia);
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
-        return fecha > hoy;
+        return fecha >= hoy;
       }, "La fecha debe ser posterior a hoy"),
     horarioPreferido: z.enum(["manana", "tarde"], {
       message: "Seleccioná un horario preferido",
