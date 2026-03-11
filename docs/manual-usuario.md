@@ -1,6 +1,6 @@
 # Manual de Usuario — Sistema de Gestión RBS Estudio Jurídico
 
-**Versión:** 2.2
+**Versión:** 2.3
 **Fecha:** Marzo 2026
 **Estudio:** Romina Belén Sanchez — Abogada · Alta Gracia, Córdoba
 
@@ -576,7 +576,9 @@ Contactar al administrador del sistema para que registre la cuenta.
 No. El panel es exclusivo para el equipo del estudio. Los clientes solo ven el sitio público.
 
 **¿Se pueden eliminar consultas?**
-Sí. Cada consulta tiene un botón con ícono de papelera, disponible en el dashboard, el listado de consultas y en la vista de detalle. Al presionarlo aparece un diálogo de confirmación antes de proceder. La eliminación es **lógica** (el registro se marca como eliminado pero no se borra físicamente de la base de datos), lo que preserva la integridad del historial.
+Sí. Cada consulta tiene un botón con ícono de papelera, disponible en el dashboard, el listado de consultas y en la vista de detalle. Al presionarlo aparece un diálogo de confirmación antes de proceder. La eliminación es **lógica** (el registro se marca como eliminado pero no se borra físicamente de la base de datos), lo que preserva la integridad del historial. Al eliminar una consulta, el turno asociado deja de aparecer en la sección Turnos.
+
+**Las fechas y horarios en el panel muestran la hora de Argentina (UTC-3)**, tanto en el listado de consultas como en el detalle y en los turnos. Los emails también respetan el horario local.
 
 **¿Cómo sé cuánto cobrar en un caso CRP?**
 En el tab **Honorarios** del caso hay una tabla de referencia arancelaria basada en la Ley 9459 (Córdoba). Todos los valores están expresados en **Jus**. Para convertir a ARS, multiplicá por el valor del Jus vigente del mes, publicado en el sitio del TSJ Córdoba.
