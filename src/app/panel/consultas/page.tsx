@@ -120,6 +120,7 @@ export default async function ConsultasPage() {
                   <div className="text-xs text-muted-foreground">
                     Recibida:{" "}
                     {new Date(consulta.createdAt).toLocaleDateString("es-AR", {
+                      timeZone: "America/Argentina/Buenos_Aires",
                       day: "numeric",
                       month: "short",
                       year: "numeric",

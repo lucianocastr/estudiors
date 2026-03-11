@@ -118,6 +118,7 @@ export default async function TurnosPage() {
                     <p className="font-medium text-green-800">
                       Turno confirmado para:{" "}
                       {new Date(turno.fechaConfirmada).toLocaleDateString("es-AR", {
+                        timeZone: "America/Argentina/Buenos_Aires",
                         weekday: "long",
                         day: "numeric",
                         month: "long",

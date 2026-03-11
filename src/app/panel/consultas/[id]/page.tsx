@@ -252,6 +252,7 @@ export default async function ConsultaDetallePage({
                     <p className="font-medium text-green-800">
                       Confirmado para:{" "}
                       {new Date(consulta.turno.fechaConfirmada).toLocaleDateString("es-AR", {
+                        timeZone: "America/Argentina/Buenos_Aires",
                         weekday: "long",
                         day: "numeric",
                         month: "long",
@@ -337,6 +338,7 @@ export default async function ConsultaDetallePage({
                         </div>
                         <span className="text-xs text-muted-foreground">
                           {new Date(nota.createdAt).toLocaleDateString("es-AR", {
+                            timeZone: "America/Argentina/Buenos_Aires",
                             day: "numeric",
                             month: "short",
                             hour: "2-digit",
@@ -467,6 +469,7 @@ export default async function ConsultaDetallePage({
                           ? `${evento.autor.nombre} · `
                           : "Sistema · "}
                         {new Date(evento.createdAt).toLocaleDateString("es-AR", {
+                          timeZone: "America/Argentina/Buenos_Aires",
                           day: "numeric",
                           month: "short",
                           hour: "2-digit",
