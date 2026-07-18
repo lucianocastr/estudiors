@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { especialidades } from "@/content/especialidades";
 
 export function Footer() {
@@ -37,6 +38,21 @@ export function Footer() {
               atención personalizada. Presencial o virtual en toda la provincia
               de Córdoba.
             </p>
+
+            {/* Dirección */}
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Dino+Carignani+275+Alta+Gracia+C%C3%B3rdoba"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-2.5 text-sm text-background/60 hover:text-background transition-colors mb-6"
+            >
+              <MapPin className="h-4 w-4 mt-0.5 text-accent/70 flex-shrink-0" />
+              <span>
+                Dino Carignani 275
+                <br />
+                Alta Gracia, Córdoba
+              </span>
+            </a>
 
             {/* Redes sociales */}
             <div className="flex items-center gap-4">

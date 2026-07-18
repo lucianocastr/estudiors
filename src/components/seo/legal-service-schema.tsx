@@ -51,7 +51,7 @@ export function LegalServiceSchema() {
       "Derecho Laboral y A.R.T.",
     ],
     sameAs: ["https://www.instagram.com/rs.ejur/"],
-    availableLanguage: "Spanish",
+    knowsLanguage: "es-AR",
   };
 
   return (
