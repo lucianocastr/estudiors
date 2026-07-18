@@ -48,6 +48,9 @@ next-env.d.ts
 # OAuth credentials (never commit secrets)
 /OAuth/
 
+# Notas con variables de entorno / secretos (nunca commitear)
+/enviroment.txt
+
 # Raw source images (solo se sirven desde /public)
 /fondo.png
 /hero.png
