@@ -9,7 +9,11 @@ import { User, ArrowRight } from "lucide-react";
 export const metadata: Metadata = {
   title: "Nuestro Equipo",
   description:
-    "Conocé a los profesionales del estudio jurídico. Abogados especializados en diversas áreas del derecho.",
+    "Conocé a la Dra. Romina Belén Sanchez y al equipo del estudio jurídico en Alta Gracia, Córdoba. Profesionales en diversas áreas del derecho.",
+  alternates: { canonical: "/equipo" },
+  openGraph: {
+    url: "https://www.rsestudiojuridico.com.ar/equipo",
+  },
 };
 
 export default function EquipoPage() {

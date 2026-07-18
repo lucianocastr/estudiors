@@ -38,7 +38,7 @@ Página principal. Estructura:
 - **Especialidades**: grid de 5 cards con ícono, nombre, descripción y link a `/especialidades/[slug]`
 - **¿Por qué elegirnos?**: 4 atributos del estudio
 - **CTA final**: botón "Hacer una consulta gratuita" → `/consulta`
-- **Botón flotante WhatsApp**: fijo en esquina inferior derecha, abre `wa.me/5493513100760`
+- **Botón flotante WhatsApp**: fijo en esquina inferior derecha, abre `wa.me/5493518916246`
 
 ---
 
@@ -110,7 +110,7 @@ Página de confirmación post-envío:
 
 Página de contacto:
 - CTA principal: "Iniciá tu consulta online" → `/consulta`
-- Grid 2 columnas: card WhatsApp (`wa.me/5493513100760`) y card Instagram (`instagram.com/rs.ejur`)
+- Grid 2 columnas: card WhatsApp (`wa.me/5493518916246`) y card Instagram (`instagram.com/rs.ejur`)
 - Nota legal al pie
 
 ---
@@ -526,7 +526,7 @@ CRPHonorarioRegistro  — Registro de honorarios devengados por tipo de trámite
 
 ### Redes Sociales
 - Instagram: https://www.instagram.com/rs.ejur/
-- WhatsApp: https://wa.me/5493513100760
+- WhatsApp: https://wa.me/5493518916246
 
 ---
 

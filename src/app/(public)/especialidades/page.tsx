@@ -6,9 +6,13 @@ import { especialidades } from "@/content/especialidades";
 import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Especialidades",
+  title: "Áreas de práctica en Alta Gracia y Córdoba",
   description:
-    "Conocé nuestras áreas de especialización: Derecho Real y Sucesiones, Daños y Accidentes, Derecho de Familia, Previsional y Laboral.",
+    "Áreas de práctica del estudio: Derecho Real, Sucesiones, Daños y Accidentes de Tránsito, Familia, Previsional y Laboral. Alta Gracia, Córdoba.",
+  alternates: { canonical: "/especialidades" },
+  openGraph: {
+    url: "https://www.rsestudiojuridico.com.ar/especialidades",
+  },
 };
 
 export default function EspecialidadesPage() {

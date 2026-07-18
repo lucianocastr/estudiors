@@ -5,6 +5,7 @@ import { AlertTriangle } from "lucide-react";
 export const metadata: Metadata = {
   title: "Aviso Legal",
   description: "Aviso legal importante sobre el contenido del sitio web.",
+  alternates: { canonical: "/legal/aviso" },
 };
 
 export default function AvisoLegalPage() {

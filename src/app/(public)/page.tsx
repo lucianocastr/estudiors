@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { especialidades } from "@/content/especialidades";
@@ -10,6 +11,11 @@ import {
   Calendar,
   Shield,
 } from "lucide-react";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { url: "https://www.rsestudiojuridico.com.ar" },
+};
 
 export default function HomePage() {
   return (

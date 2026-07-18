@@ -7,7 +7,11 @@ import { ArrowRight, MessageSquare } from "lucide-react";
 export const metadata: Metadata = {
   title: "Contacto",
   description:
-    "Contactá al Estudio Jurídico Sanchez y Asociados. Iniciá tu consulta online o escribinos por WhatsApp o Instagram.",
+    "Contactá al Estudio Jurídico Romina Belén Sanchez en Alta Gracia, Córdoba. Iniciá tu consulta online o escribinos por WhatsApp o Instagram.",
+  alternates: { canonical: "/contacto" },
+  openGraph: {
+    url: "https://www.rsestudiojuridico.com.ar/contacto",
+  },
 };
 
 export default function ContactoPage() {

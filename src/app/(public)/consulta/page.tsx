@@ -5,7 +5,11 @@ import { ConsultaForm } from "@/components/forms/consulta-form";
 export const metadata: Metadata = {
   title: "Hacer una Consulta",
   description:
-    "Completá el formulario para hacer una consulta al estudio jurídico. Te contactaremos a la brevedad.",
+    "Completá el formulario para hacer una consulta al estudio jurídico en Alta Gracia, Córdoba. Te contactaremos a la brevedad, presencial o virtual.",
+  alternates: { canonical: "/consulta" },
+  openGraph: {
+    url: "https://www.rsestudiojuridico.com.ar/consulta",
+  },
 };
 
 export default function ConsultaPage() {

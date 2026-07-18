@@ -7,6 +7,8 @@ import { CheckCircle2, ArrowRight } from "lucide-react";
 export const metadata: Metadata = {
   title: "Consulta Enviada",
   description: "Tu consulta fue enviada correctamente.",
+  alternates: { canonical: "/consulta/gracias" },
+  robots: { index: false, follow: true },
 };
 
 export default function GraciasPage() {

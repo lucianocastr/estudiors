@@ -23,29 +23,44 @@ export const metadata: Metadata = {
     template: "%s | Estudio Jurídico RBS",
   },
   description:
-    "Estudio jurídico en Alta Gracia, Córdoba. Especialistas en Derecho Real, Daños y Accidentes, Derecho de Familia, Previsional y Laboral.",
+    "Estudio jurídico en Alta Gracia, Córdoba. Asesoramiento en Derecho Real, Sucesiones, Daños y Accidentes, Familia, Previsional y Laboral. Consultá online.",
   keywords: [
-    "abogados",
-    "estudio juridico",
-    "alta gracia",
-    "cordoba",
-    "derecho real",
-    "usucapion",
+    "abogado alta gracia",
+    "abogada alta gracia",
+    "estudio juridico alta gracia",
+    "abogado cordoba",
+    "usucapion cordoba",
+    "sucesiones alta gracia",
+    "declaratoria de herederos",
     "accidentes de transito",
     "divorcios",
-    "jubilaciones",
+    "jubilaciones anses",
     "derecho laboral",
     "Romina Sanchez abogada",
   ],
   authors: [{ name: "Estudio Jurídico Romina Belén Sanchez" }],
-  alternates: {
-    canonical: "https://www.rsestudiojuridico.com.ar",
-  },
   openGraph: {
     type: "website",
     locale: "es_AR",
     siteName: "Estudio Jurídico RBS",
-    url: "https://www.rsestudiojuridico.com.ar",
+    title: "Estudio Jurídico Romina Belén Sanchez | Alta Gracia, Córdoba",
+    description:
+      "Asesoramiento legal en Alta Gracia, Córdoba: Derecho Real, Sucesiones, Daños, Familia, Previsional y Laboral. Presencial o virtual.",
+    images: [
+      {
+        url: "/imagenMain.png",
+        width: 1536,
+        height: 1024,
+        alt: "Estudio Jurídico Romina Belén Sanchez — Alta Gracia, Córdoba",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Estudio Jurídico Romina Belén Sanchez | Alta Gracia, Córdoba",
+    description:
+      "Asesoramiento legal en Alta Gracia, Córdoba. Presencial o virtual.",
+    images: ["/imagenMain.png"],
   },
   robots: {
     index: true,

@@ -25,9 +25,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: "Especialidad no encontrada" };
   }
 
+  const canonical = `/especialidades/${especialidad.slug}`;
+
   return {
-    title: especialidad.nombre,
-    description: especialidad.descripcionCorta,
+    title: `${especialidad.nombre} en Alta Gracia y Córdoba`,
+    description: `${especialidad.descripcionCorta} Estudio jurídico en Alta Gracia, Córdoba.`,
+    alternates: { canonical },
+    openGraph: {
+      title: `${especialidad.nombre} | Estudio Jurídico RBS`,
+      description: especialidad.descripcionCorta,
+      url: `https://www.rsestudiojuridico.com.ar${canonical}`,
+      type: "article",
+    },
   };
 }
 
