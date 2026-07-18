@@ -34,7 +34,7 @@ async function getEstadisticas(organizacionId: string) {
     prisma.consulta.count({ where: base }),
     prisma.consulta.count({ where: { ...base, estado: "NUEVA" } }),
     prisma.consulta.count({ where: { ...base, estado: "EN_ANALISIS" } }),
-    prisma.turno.count({ where: { organizacionId, deletedAt: null, estado: "PENDIENTE" } }),
+    prisma.turno.count({ where: { organizacionId, deletedAt: null, estado: "PENDIENTE", consulta: { deletedAt: null } } }),
     prisma.consulta.count({ where: { ...base, urgente: true, estado: { not: "CERRADO" } } }),
   ]);
 
