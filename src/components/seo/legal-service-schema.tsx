@@ -6,8 +6,6 @@ const SITE_URL = "https://www.rsestudiojuridico.com.ar";
  * local de forma inequívoca (nombre, dirección, zona, teléfono, redes).
  *
  * Pendiente de completar cuando estén los datos:
- *  - openingHoursSpecification (horarios de atención)
- *  - geo (coordenadas exactas, tomar de Google Business Profile ya verificado)
  *  - aggregateRating / review (cuando haya reseñas en Google)
  */
 export function LegalServiceSchema() {
@@ -33,6 +31,25 @@ export function LegalServiceSchema() {
       postalCode: "X5186HDD",
       addressCountry: "AR",
     },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: -31.6567826,
+      longitude: -64.4302657,
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "09:00",
+        closes: "13:30",
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "16:30",
+        closes: "20:00",
+      },
+    ],
     areaServed: [
       { "@type": "City", name: "Alta Gracia" },
       { "@type": "AdministrativeArea", name: "Provincia de Córdoba" },
