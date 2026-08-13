@@ -1,0 +1,27 @@
+Query 1 — Crear usuario:
+
+
+INSERT INTO "Usuario" (id, email, nombre, rol, activo, "createdAt", "updatedAt")
+VALUES (
+  gen_random_uuid(),
+  'EMAIL_AQUI',
+  'NOMBRE_AQUI',
+  'ADMIN',
+  true,
+  now(),
+  now()
+);
+Query 2 — Agregar a la organización:
+
+
+INSERT INTO "OrganizacionMiembro" (id, "organizacionId", "usuarioId", rol, activo, "createdAt")
+SELECT
+  gen_random_uuid(),
+  (SELECT id FROM "Organizacion" LIMIT 1),
+  id,
+  'ADMIN',
+  true,
+  now()
+FROM "Usuario"
+WHERE email = 'EMAIL_AQUI';
+Reemplazá EMAIL_AQUI y NOMBRE_AQUI cada vez que quieras agregar un nuevo admin.
