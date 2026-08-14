@@ -19,8 +19,8 @@ export const INDICADORES: {
     value: "SMVM",
     label: "Salario Mínimo Vital y Móvil",
     tipo: "unico",
-    fuente: "Consejo Nacional del Empleo (Boletín Oficial)",
-    fuenteUrl: "https://www.boletinoficial.gob.ar/",
+    fuente: "Consejo del Salario (Ministerio de Trabajo)",
+    fuenteUrl: "https://www.argentina.gob.ar/trabajo/consejodelsalario",
   },
   {
     value: "JUS",
@@ -56,7 +56,7 @@ const MESES = [
 /** "2026-08" → "Agosto 2026" */
 export function formatPeriodo(periodo: string): string {
   const [y, m] = periodo.split("-");
-  const mi = parseInt(m, 10) - 1;
+  const mi = Number.parseInt(m, 10) - 1;
   return MESES[mi] ? `${MESES[mi]} ${y}` : periodo;
 }
 

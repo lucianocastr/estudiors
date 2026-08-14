@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getTodosLosHistoricos } from "@/lib/valores-referencia-queries";
-import { HistoricoTabla } from "@/components/informacion/valores";
+import { IndicadorHistorico } from "@/components/informacion/valores";
 import { INDICADORES } from "@/lib/valores-referencia";
 import type { IndicadorReferencia } from "@prisma/client";
 
@@ -64,7 +64,7 @@ export default async function ValoresReferenciaPage() {
                     <h2 className="font-display text-xl md:text-2xl font-semibold mb-4 text-foreground">
                       {ind.label}
                     </h2>
-                    <HistoricoTabla
+                    <IndicadorHistorico
                       indicador={ind.value as IndicadorReferencia}
                       valores={valores}
                     />

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ChevronRight } from "lucide-react";
 import type { IndicadorReferencia, ValorReferencia } from "@prisma/client";
 import {
   CANASTA_TRAMOS,
@@ -80,6 +80,69 @@ export function ValoresVigentes({
           Ver histórico completo →
         </Link>
       </div>
+    </div>
+  );
+}
+
+/** Valor vigente (compacto) + histórico colapsable. Para la página de valores. */
+export function IndicadorHistorico({
+  indicador,
+  valores,
+}: {
+  indicador: IndicadorReferencia;
+  valores: ValorReferencia[];
+}) {
+  if (valores.length === 0) return null;
+  const ultimo = valores[0];
+  const esCanasta = indicador === "CANASTA_CRIANZA";
+
+  return (
+    <div>
+      {/* Valor vigente */}
+      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+        <div className="flex items-baseline justify-between gap-3 mb-3 flex-wrap">
+          <span className="text-xs uppercase tracking-wide text-muted-foreground">
+            Valor vigente
+          </span>
+          <span className="text-xs text-muted-foreground">
+            {formatPeriodo(ultimo.periodo)} · {ultimo.fuente}
+          </span>
+        </div>
+        {esCanasta ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {CANASTA_TRAMOS.map((t) => {
+              const n = leerValor(ultimo.valores, t.key);
+              return (
+                <div key={t.key}>
+                  <span className="block text-[11px] text-muted-foreground mb-0.5">
+                    {t.label}
+                  </span>
+                  <span className="block text-base font-semibold text-foreground tabular-nums">
+                    {n != null ? formatARS(n) : "—"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <span className="text-2xl font-semibold text-foreground tabular-nums">
+            {valorSimple(ultimo)}
+          </span>
+        )}
+      </div>
+
+      {/* Histórico colapsable */}
+      {valores.length > 1 && (
+        <details className="group mt-3">
+          <summary className="flex items-center gap-1.5 cursor-pointer text-sm text-primary hover:underline py-1 list-none [&::-webkit-details-marker]:hidden select-none w-fit">
+            <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+            Ver histórico completo · {valores.length} períodos
+          </summary>
+          <div className="mt-3">
+            <HistoricoTabla indicador={indicador} valores={valores} />
+          </div>
+        </details>
+      )}
     </div>
   );
 }
