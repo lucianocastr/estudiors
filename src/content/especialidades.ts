@@ -22,6 +22,9 @@ export interface Especialidad {
   descripcionCorta: string;
   descripcionLarga: string;
   problemas: TipoProblema[];
+  // Overrides de SEO (opcionales) para apuntar a búsquedas específicas
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
 export const especialidades: Especialidad[] = [
@@ -73,11 +76,16 @@ export const especialidades: Especialidad[] = [
     icono: Scroll,
     descripcionCorta:
       "Inicio de sucesión, declaratoria de herederos, adjudicaciones y tracto abreviado.",
+    seoTitle: "Declaración de Herederos y Sucesiones en Córdoba",
+    seoDescription:
+      "Iniciamos tu sucesión y la declaración (declaratoria) de herederos en Córdoba. Asesoramiento en Alta Gracia y toda la provincia. Consultá tu caso sin compromiso.",
     descripcionLarga: `
       Acompañamos a las familias en el proceso sucesorio desde el fallecimiento del
       causante hasta la adjudicación de los bienes. Gestionamos la declaratoria de
-      herederos, las adjudicaciones y el tracto sucesivo abreviado para la
-      regularización dominial, tanto en sucesiones extrajudiciales como judiciales.
+      herederos —también conocida como declaración de herederos—, las adjudicaciones
+      y el tracto sucesivo abreviado para la regularización dominial, tanto en
+      sucesiones extrajudiciales como judiciales, en Alta Gracia y toda la provincia
+      de Córdoba.
     `,
     problemas: [
       {

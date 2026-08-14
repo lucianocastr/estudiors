@@ -130,9 +130,9 @@ export const articulos: Articulo[] = [
         ],
       },
       {
-        titulo: "¿Qué es la declaratoria de herederos?",
+        titulo: "¿Qué es la declaratoria (o declaración) de herederos?",
         parrafos: [
-          "Es la resolución que reconoce quiénes son los herederos del fallecido. A partir de ella se pueden inscribir los bienes a nombre de esos herederos y así venderlos, transferirlos o disponer de ellos.",
+          "Es la resolución que reconoce quiénes son los herederos del fallecido. A partir de ella se pueden inscribir los bienes a nombre de esos herederos y así venderlos, transferirlos o disponer de ellos. En Córdoba, la iniciás en el fuero civil que corresponda.",
         ],
       },
       {

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { especialidades, getEspecialidadBySlug } from "@/content/especialidades";
-import { ArrowRight, ArrowLeft, Info } from "lucide-react";
+import { articulos } from "@/content/informacion";
+import { ArrowRight, ArrowLeft, Info, BookOpen } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -28,8 +29,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const canonical = `/especialidades/${especialidad.slug}`;
 
   return {
-    title: `${especialidad.nombre} en Alta Gracia y Córdoba`,
-    description: `${especialidad.descripcionCorta} Estudio jurídico en Alta Gracia, Córdoba.`,
+    title: especialidad.seoTitle ?? `${especialidad.nombre} en Alta Gracia y Córdoba`,
+    description:
+      especialidad.seoDescription ??
+      `${especialidad.descripcionCorta} Estudio jurídico en Alta Gracia, Córdoba.`,
     alternates: { canonical },
     openGraph: {
       title: `${especialidad.nombre} | Estudio Jurídico RBS`,
@@ -49,6 +52,9 @@ export default async function EspecialidadPage({ params }: PageProps) {
   }
 
   const Icon = especialidad.icono;
+  const notasRelacionadas = articulos.filter(
+    (a) => a.especialidadSlug === especialidad.slug
+  );
 
   return (
     <>
@@ -116,6 +122,34 @@ export default async function EspecialidadPage({ params }: PageProps) {
                 </Card>
               ))}
             </div>
+
+            {/* Leé también — artículos relacionados */}
+            {notasRelacionadas.length > 0 && (
+              <div className="mb-12">
+                <h2 className="font-display text-2xl font-semibold mb-6 text-foreground">
+                  Leé también
+                </h2>
+                <div className="space-y-3">
+                  {notasRelacionadas.map((nota) => (
+                    <Link
+                      key={nota.slug}
+                      href={`/informacion/${nota.slug}`}
+                      className="flex items-start gap-3 p-4 rounded-xl border border-border/60 hover:border-accent/35 hover:bg-secondary/30 transition-colors"
+                    >
+                      <BookOpen className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
+                      <span className="min-w-0">
+                        <span className="block font-medium text-sm text-foreground leading-snug">
+                          {nota.titulo}
+                        </span>
+                        <span className="block text-xs text-muted-foreground mt-1">
+                          {nota.resumen}
+                        </span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* CTA */}
             <div className="bg-secondary/50 rounded-2xl p-8 md:p-10 text-center border border-border/50">
