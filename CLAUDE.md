@@ -56,8 +56,8 @@ Flujo público: `Contacto (1) → Consulta (N) → Turno (1)`, con `Nota` y `Con
 
 ## Mapa de rutas
 
-- `src/app/(public)/` — sitio público (con Header + Footer, JSON-LD): `/`, `/especialidades[/slug]` (6 slugs estáticos), `/consulta[/gracias]`, `/contacto`, `/equipo`, `/legal/{aviso,privacidad,terminos}`
-- `src/app/panel/` — CRM (protegido por `src/middleware.ts`): dashboard, `/consultas[/id]`, `/turnos`, `/reestructuracion[/nuevo|/id]`
+- `src/app/(public)/` — sitio público (con Header + Footer, JSON-LD): `/`, `/especialidades[/slug]` (6 slugs estáticos), `/informacion[/slug]` (artículos educativos) + `/informacion/valores-de-referencia` (histórico de indicadores), `/consulta[/gracias]`, `/contacto`, `/equipo`, `/legal/{aviso,privacidad,terminos}`
+- `src/app/panel/` — CRM (protegido por `src/middleware.ts`): dashboard, `/consultas[/id]`, `/turnos`, `/reestructuracion[/nuevo|/id]`, `/valores` (carga de valores de referencia)
 - `src/app/api/` — `consulta` (POST: crea Contacto+Consulta+Turno+EmailCola), `email-worker` (POST: procesa cola), `auth/[...nextauth]`
 - `src/app/auth/{login,error}` — Google OAuth
 
@@ -66,9 +66,11 @@ Flujo público: `Contacto (1) → Consulta (N) → Turno (1)`, con `Nota` y `Con
 - `src/lib/auth.ts` — NextAuth v5, roles, helpers · `src/lib/db.ts` — Prisma client
 - `src/lib/email.ts` — envío (funciones payload-based, sin tipos Prisma) · `src/lib/validators.ts` — Zod
 - `src/lib/crp-utils.ts` — labels/colores/cálculos CRP · `src/content/especialidades.ts` — contenido de especialidades (+ `problemas[]` que alimenta el formulario)
+- `src/content/informacion.ts` — artículos educativos de la sección `/informacion` (patrón espejo de especialidades: array + `[slug]`). Contenido orientativo — **revisar con la profesional antes de publicar**. Un artículo con `indicador` muestra la tabla de valores vigentes de ese indicador.
+- `src/lib/valores-referencia.ts` — helpers puros de valores (labels, tramos canasta, formato ARS/período), client-safe · `src/lib/valores-referencia-queries.ts` — consultas públicas (server), scopeadas a `DEFAULT_ORGANIZATION_ID` · `src/components/informacion/valores.tsx` — tablas (vigente + histórico) · `src/app/panel/valores/` — backoffice de carga (form + `actions.ts` con upsert por período)
 - `src/components/seo/legal-service-schema.tsx` — JSON-LD `LegalService` (montado en `(public)/layout.tsx`)
 - `src/app/panel/consultas/[id]/actions.ts` — Server Actions (estado, nota, confirmar/rechazar turno, eliminar)
-- `prisma/schema.prisma` — 22 modelos (12 core + 9 CRP + Especialidad)
+- `prisma/schema.prisma` — 23 modelos (12 core + 9 CRP + Especialidad + ValorReferencia)
 
 ---
 
@@ -95,6 +97,7 @@ Flujo público: `Contacto (1) → Consulta (N) → Turno (1)`, con `Nota` y `Con
 - **Formulario consulta paso 3:** validar `localidad` antes de avanzar (si se omite → 400 en la API).
 - **psql local (9.5)** NO conecta a Neon (SCRAM). Para consultar la base: script Node con Prisma client + `DATABASE_URL` de `.env`.
 - **`CRON_SECRET` no está seteado** → el endpoint `/api/email-worker` es público. Hardening pendiente (setear el secreto + header `x-cron-token` en cron-job.org).
+- **Valores de referencia:** los cargan desde `/panel/valores`; las páginas públicas que los muestran (`/informacion/[slug]` con `indicador`, y `/informacion/valores-de-referencia`) son **ISR** (`export const revalidate = 3600`) y scopean por `DEFAULT_ORGANIZATION_ID`. Las Server Actions de carga llaman `revalidatePath` de esas rutas. Si un valor cargado no aparece en el sitio: verificar que `DEFAULT_ORGANIZATION_ID` coincida con la organización desde la que se cargó.
 
 ---
 

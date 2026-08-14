@@ -97,6 +97,12 @@ enum OrganizacionPlan {
   ENTERPRISE
 }
 
+enum IndicadorReferencia {
+  CANASTA_CRIANZA
+  SMVM
+  JUS
+}
+
 // ============================================
 // ORGANIZACIÓN — Tenant root
 // ============================================
@@ -123,8 +129,34 @@ model Organizacion {
   emailCola            EmailCola[]
   configuraciones      Configuracion[]
   casosRestructuracion CasoRestructuracion[]
+  valoresReferencia    ValorReferencia[]
 
   @@index([slug])
+  @@index([deletedAt])
+}
+
+// ============================================
+// VALORES DE REFERENCIA — Indicadores (canasta, SMVM, Jus)
+// ============================================
+
+model ValorReferencia {
+  id             String              @id @default(cuid())
+  organizacionId String
+  organizacion   Organizacion        @relation(fields: [organizacionId], references: [id])
+
+  indicador      IndicadorReferencia
+  periodo        String              // "2026-08" — identifica el período del valor
+  vigenteDesde   DateTime
+  valores        Json                // {valor:number} (SMVM/Jus) | {menor_1,1_3,4_5,6_12} (canasta)
+  fuente         String              // "INDEC", "Boletín Oficial", ...
+  fuenteUrl      String?
+
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  deletedAt      DateTime?
+
+  @@unique([organizacionId, indicador, periodo])
+  @@index([organizacionId, indicador])
   @@index([deletedAt])
 }
 

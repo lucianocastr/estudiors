@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MessageSquare, Calendar, Briefcase } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Calendar, Briefcase, TrendingUp } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/panel",                label: "Dashboard",        icon: LayoutDashboard },
   { href: "/panel/consultas",      label: "Consultas",        icon: MessageSquare },
   { href: "/panel/turnos",         label: "Turnos",           icon: Calendar },
   { href: "/panel/reestructuracion", label: "Reestructuración", icon: Briefcase },
+  { href: "/panel/valores",        label: "Valores",          icon: TrendingUp },
 ] as const;
 
 function isActive(pathname: string, href: string): boolean {
