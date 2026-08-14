@@ -26,8 +26,9 @@ export const INDICADORES: {
     value: "JUS",
     label: "Valor del Jus (Córdoba)",
     tipo: "unico",
-    fuente: "TSJ Córdoba",
-    fuenteUrl: "https://www.justiciacordoba.gob.ar/",
+    fuente: "TSJ Córdoba (Ley 9459)",
+    fuenteUrl:
+      "https://www.justiciacordoba.gob.ar/justiciacordoba/Servicios/JUSyUnidadEconomica/1",
   },
 ];
 
@@ -64,7 +65,8 @@ export function formatARS(n: number): string {
   return new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(n);
 }
 
