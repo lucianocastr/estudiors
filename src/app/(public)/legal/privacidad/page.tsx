@@ -37,6 +37,14 @@ export default function PrivacidadPage() {
             <li>Localidad</li>
             <li>Descripción de la consulta o situación</li>
           </ul>
+          <p>
+            Además, cuando navegás el sitio recopilamos datos técnicos de forma
+            agregada, con fines estadísticos: tipo de dispositivo, localidad
+            aproximada (ciudad o provincia) y la página o el sitio desde el que
+            llegaste. <strong>No almacenamos tu dirección IP.</strong> Para esto
+            utilizamos Google Analytics y un registro propio, con el único fin de
+            entender el uso del sitio y mejorarlo.
+          </p>
 
           <h2>3. Finalidad del Tratamiento</h2>
           <p>Los datos personales se utilizan para:</p>

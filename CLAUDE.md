@@ -57,8 +57,8 @@ Flujo público: `Contacto (1) → Consulta (N) → Turno (1)`, con `Nota` y `Con
 ## Mapa de rutas
 
 - `src/app/(public)/` — sitio público (con Header + Footer, JSON-LD): `/`, `/especialidades[/slug]` (6 slugs estáticos), `/informacion[/slug]` (artículos educativos) + `/informacion/valores-de-referencia` (histórico de indicadores), `/consulta[/gracias]`, `/contacto`, `/equipo`, `/legal/{aviso,privacidad,terminos}`
-- `src/app/panel/` — CRM (protegido por `src/middleware.ts`): dashboard, `/consultas[/id]`, `/turnos`, `/reestructuracion[/nuevo|/id]`, `/valores` (carga de valores de referencia)
-- `src/app/api/` — `consulta` (POST: crea Contacto+Consulta+Turno+EmailCola), `email-worker` (POST: procesa cola), `auth/[...nextauth]`
+- `src/app/panel/` — CRM (protegido por `src/middleware.ts`): dashboard, `/consultas[/id]`, `/turnos`, `/reestructuracion[/nuevo|/id]`, `/valores` (valores de referencia), `/visitas` (analítica propia)
+- `src/app/api/` — `consulta` (POST: crea Contacto+Consulta+Turno+EmailCola), `email-worker` (POST: procesa cola), `track` (POST: registra visita), `auth/[...nextauth]`
 - `src/app/auth/{login,error}` — Google OAuth
 
 ## Archivos clave
@@ -70,7 +70,8 @@ Flujo público: `Contacto (1) → Consulta (N) → Turno (1)`, con `Nota` y `Con
 - `src/lib/valores-referencia.ts` — helpers puros de valores (labels, tramos canasta, formato ARS/período), client-safe · `src/lib/valores-referencia-queries.ts` — consultas públicas (server), scopeadas a `DEFAULT_ORGANIZATION_ID` · `src/components/informacion/valores.tsx` — tablas (vigente + histórico) · `src/app/panel/valores/` — backoffice de carga (form + `actions.ts` con upsert por período)
 - `src/components/seo/legal-service-schema.tsx` — JSON-LD `LegalService` (montado en `(public)/layout.tsx`)
 - `src/app/panel/consultas/[id]/actions.ts` — Server Actions (estado, nota, confirmar/rechazar turno, eliminar)
-- `prisma/schema.prisma` — 23 modelos (12 core + 9 CRP + Especialidad + ValorReferencia)
+- `src/components/analytics/` — `google-analytics.tsx` (GA4, se activa con `NEXT_PUBLIC_GA_ID`) + `visit-tracker.tsx` (beacon → `/api/track`) · `src/lib/visitas.ts` — helpers (dispositivo/fuente/bot) · `src/app/panel/visitas/` — panel de analítica propia
+- `prisma/schema.prisma` — 24 modelos (12 core + 9 CRP + Especialidad + ValorReferencia + VisitaSitio)
 
 ---
 
@@ -109,7 +110,9 @@ GOOGLE_CLIENT_ID · GOOGLE_CLIENT_SECRET
 SMTP_HOST · SMTP_PORT · SMTP_USER · SMTP_PASSWORD · SMTP_FROM
 ESTUDIO_NOMBRE · ESTUDIO_EMAIL · ESTUDIO_TELEFONO · ESTUDIO_DIRECCION
 ADMIN_EMAIL · DEFAULT_ORGANIZATION_ID · CRON_SECRET (opcional)
+NEXT_PUBLIC_GA_ID (opcional — Measurement ID de GA4, ej. G-XXXX; sin él, GA no carga)
 ```
+**Analítica:** GA4 (`NEXT_PUBLIC_GA_ID`) + registro propio (`VisitaSitio` vía `POST /api/track`, montado en `(public)/layout`). El registro **no guarda IP**: la localidad sale de los headers `x-vercel-ip-*` (sólo existen en producción; en local la ciudad queda null). Panel en `/panel/visitas`. Filtra bots por User-Agent. Mencionado en la Política de Privacidad.
 Notas: `.env` y `enviroment.txt` están gitignoreados (secretos). `SMTP_USER`/`SMTP_FROM` = cuenta que envía (hoy `rsestudiojur@gmail.com`); `ESTUDIO_EMAIL` = casilla que recibe avisos.
 
 ---

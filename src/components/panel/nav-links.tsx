@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, MessageSquare, Calendar, Briefcase, TrendingUp } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Calendar, Briefcase, TrendingUp, BarChart3 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/panel",                label: "Dashboard",        icon: LayoutDashboard },
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { href: "/panel/turnos",         label: "Turnos",           icon: Calendar },
   { href: "/panel/reestructuracion", label: "Reestructuración", icon: Briefcase },
   { href: "/panel/valores",        label: "Valores",          icon: TrendingUp },
+  { href: "/panel/visitas",        label: "Visitas",          icon: BarChart3 },
 ] as const;
 
 function isActive(pathname: string, href: string): boolean {

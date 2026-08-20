@@ -103,6 +103,13 @@ enum IndicadorReferencia {
   JUS
 }
 
+enum DispositivoVisita {
+  MOVIL
+  ESCRITORIO
+  TABLET
+  OTRO
+}
+
 // ============================================
 // ORGANIZACIÓN — Tenant root
 // ============================================
@@ -130,6 +137,7 @@ model Organizacion {
   configuraciones      Configuracion[]
   casosRestructuracion CasoRestructuracion[]
   valoresReferencia    ValorReferencia[]
+  visitas              VisitaSitio[]
 
   @@index([slug])
   @@index([deletedAt])
@@ -158,6 +166,27 @@ model ValorReferencia {
   @@unique([organizacionId, indicador, periodo])
   @@index([organizacionId, indicador])
   @@index([deletedAt])
+}
+
+// ============================================
+// VISITAS AL SITIO — analítica propia (sin IP)
+// ============================================
+
+model VisitaSitio {
+  id             String            @id @default(cuid())
+  organizacionId String
+  organizacion   Organizacion      @relation(fields: [organizacionId], references: [id])
+
+  path           String            // página de entrada
+  dispositivo    DispositivoVisita @default(OTRO)
+  ciudad         String?           // derivada por IP (Vercel), sin guardar la IP
+  region         String?
+  pais           String?
+  fuente         String?           // "directo" | "google" | "instagram" | host
+
+  createdAt      DateTime          @default(now())
+
+  @@index([organizacionId, createdAt])
 }
 
 // ============================================
