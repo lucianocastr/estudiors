@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DISPOSITIVO_LABELS, labelFuente } from "@/lib/visitas";
+import { DISPOSITIVO_LABELS, labelFuente, labelLocalidad } from "@/lib/visitas";
 import { Smartphone, Monitor, MapPin, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -93,7 +93,7 @@ export default async function VisitasPage() {
   const pctMovil = total > 0 ? Math.round((movil / total) * 100) : 0;
 
   const porDispositivo = topPor(visitas, (v) => DISPOSITIVO_LABELS[v.dispositivo], 4);
-  const topCiudades = topPor(visitas, (v) => v.ciudad ?? "Desconocida");
+  const topCiudades = topPor(visitas, (v) => labelLocalidad(v.ciudad, v.region, v.pais));
   const topFuentes = topPor(visitas, (v) => labelFuente(v.fuente));
   const topPaginas = topPor(visitas, (v) => v.path);
   const recientes = visitas.slice(0, 12);
@@ -170,7 +170,7 @@ export default async function VisitasPage() {
                 >
                   <div className="min-w-0">
                     <span className="font-medium text-foreground">
-                      {v.ciudad ?? "Localidad desconocida"}
+                      {labelLocalidad(v.ciudad, v.region, v.pais)}
                     </span>
                     <span className="text-muted-foreground">
                       {" "}· {DISPOSITIVO_LABELS[v.dispositivo]} · {labelFuente(v.fuente)}

@@ -41,6 +41,28 @@ export const DISPOSITIVO_LABELS: Record<DispositivoVisita, string> = {
   OTRO: "Otro",
 };
 
+// Códigos ISO 3166-2 de provincias argentinas → nombre (region de Vercel)
+const AR_PROVINCIAS: Record<string, string> = {
+  A: "Salta", B: "Buenos Aires", C: "CABA", D: "San Luis", E: "Entre Ríos",
+  F: "La Rioja", G: "Santiago del Estero", H: "Chaco", J: "San Juan",
+  K: "Catamarca", L: "La Pampa", M: "Mendoza", N: "Misiones", P: "Formosa",
+  Q: "Neuquén", R: "Río Negro", S: "Santa Fe", T: "Tucumán", U: "Chubut",
+  V: "Tierra del Fuego", W: "Corrientes", X: "Córdoba", Y: "Jujuy", Z: "Santa Cruz",
+};
+
+/** Localidad legible: ciudad, si no la provincia (AR), si no país o "Desconocida". */
+export function labelLocalidad(
+  ciudad: string | null,
+  region: string | null,
+  pais: string | null
+): string {
+  if (ciudad) return ciudad;
+  if (pais === "AR" && region && AR_PROVINCIAS[region]) return AR_PROVINCIAS[region];
+  if (region && pais) return `${region}, ${pais}`;
+  if (pais) return pais;
+  return "Desconocida";
+}
+
 export function labelFuente(f: string | null): string {
   if (!f) return "Directo";
   const map: Record<string, string> = {
